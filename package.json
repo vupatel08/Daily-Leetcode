@@ -3,10 +3,13 @@
     "version": "1.0.0",
     "description": "Automated LeetCode bot that fetches questions and generates solutions using OpenRouter",
     "main": "index.js",
-    "scripts": {
-        "start": "node index.js",
-        "test": "node test.js"
-    },
+      "scripts": {
+    "start": "node index.js",
+    "test": "node test.js",
+    "daily": "node daily-auto.js",
+    "weekly": "node daily-auto.js weekly",
+    "auto": "node daily-auto.js"
+  },
     "dependencies": {
         "graphql": "^16.8.1",
         "graphql-request": "^6.1.0",

@@ -416,16 +416,18 @@ ${solution}`;
 
 // Main execution
 async function main() {
-    const bot = new LeetCodeBot();
-
-    // Check if a specific problem slug was provided as command line argument
-    const args = process.argv.slice(2);
-
-    if (args.length > 0) {
-        await bot.solveSpecificProblem(args[0]);
-    } else {
-        await bot.solveRandomProblem();
-    }
+  const bot = new LeetCodeBot();
+  
+  // Check if a specific problem slug was provided as command line argument
+  const args = process.argv.slice(2);
+  
+  if (args.length > 0) {
+    await bot.solveSpecificProblem(args[0]);
+  } else {
+    // Automatically solve problems with difficulty balance
+    console.log('🤖 Starting automated LeetCode solving...');
+    await bot.solveProblemsWithDifficultyBalance(3);
+  }
 }
 
 if (require.main === module) {
