@@ -74,52 +74,91 @@ const GET_PROBLEMS_LIST = gql`
 class LeetCodeBot {
     constructor() {
         this.client = new GraphQLClient(LEETCODE_GRAPHQL_URL);
+        
+        // Predefined lists of problems by difficulty
+        this.problemsByDifficulty = {
+            'Easy': [
+                'two-sum', 'reverse-integer', 'palindrome-number', 'roman-to-integer',
+                'longest-common-prefix', 'valid-parentheses', 'merge-two-sorted-lists',
+                'remove-duplicates-from-sorted-array', 'remove-element', 'find-the-index-of-the-first-occurrence-in-a-string',
+                'search-insert-position', 'length-of-last-word', 'plus-one', 'add-binary',
+                'sqrt-x', 'climbing-stairs', 'remove-duplicates-from-sorted-list',
+                'merge-sorted-array', 'same-tree', 'symmetric-tree', 'maximum-depth-of-binary-tree',
+                'binary-tree-inorder-traversal', 'convert-sorted-array-to-binary-search-tree',
+                'balanced-binary-tree', 'minimum-depth-of-binary-tree', 'path-sum',
+                'pascals-triangle', 'best-time-to-buy-and-sell-stock', 'valid-palindrome',
+                'single-number', 'linked-list-cycle', 'intersection-of-two-linked-lists',
+                'excel-sheet-column-title', 'majority-element', 'factorial-trailing-zeroes',
+                'excel-sheet-column-number', 'reverse-bits', 'number-of-1-bits',
+                'happy-number', 'remove-linked-list-elements', 'count-primes',
+                'isomorphic-strings', 'reverse-linked-list', 'contains-duplicate',
+                'contains-duplicate-ii', 'invert-binary-tree', 'power-of-two',
+                'implement-queue-using-stacks', 'palindrome-linked-list', 'lowest-common-ancestor-of-a-binary-search-tree',
+                'delete-node-in-a-linked-list', 'valid-anagram', 'binary-tree-paths',
+                'add-digits', 'ugly-number', 'missing-number', 'first-bad-version',
+                'move-zeroes', 'word-pattern', 'nim-game', 'range-sum-query-immutable'
+            ],
+            'Medium': [
+                'add-two-numbers', 'longest-substring-without-repeating-characters',
+                'longest-palindromic-substring', 'zigzag-conversion', 'reverse-integer',
+                'string-to-integer-atoi', 'container-with-most-water', '3sum',
+                '3sum-closest', 'letter-combinations-of-a-phone-number', '4sum',
+                'remove-nth-node-from-end-of-list', 'valid-parentheses', 'merge-k-sorted-lists',
+                'swap-nodes-in-pairs', 'reverse-nodes-in-k-group', 'remove-duplicates-from-sorted-array',
+                'remove-element', 'divide-two-integers', 'substring-with-concatenation-of-all-words',
+                'next-permutation', 'longest-valid-parentheses', 'search-in-rotated-sorted-array',
+                'find-first-and-last-position-of-element-in-sorted-array', 'search-insert-position',
+                'valid-sudoku', 'sudoku-solver', 'count-and-say', 'combination-sum',
+                'combination-sum-ii', 'first-missing-positive', 'trapping-rain-water',
+                'multiply-strings', 'wildcard-matching', 'jump-game-ii', 'permutations',
+                'permutations-ii', 'rotate-image', 'group-anagrams', 'pow-x-n',
+                'n-queens', 'n-queens-ii', 'maximum-subarray', 'spiral-matrix',
+                'jump-game', 'merge-intervals', 'insert-interval', 'length-of-last-word',
+                'spiral-matrix-ii', 'permutation-sequence', 'rotate-list', 'unique-paths',
+                'unique-paths-ii', 'minimum-path-sum', 'valid-number', 'plus-one',
+                'add-binary', 'text-justification', 'sqrt-x', 'climbing-stairs'
+            ],
+            'Hard': [
+                'median-of-two-sorted-arrays', 'regular-expression-matching',
+                'merge-k-sorted-lists', 'reverse-nodes-in-k-group', 'substring-with-concatenation-of-all-words',
+                'longest-valid-parentheses', 'sudoku-solver', 'first-missing-positive',
+                'trapping-rain-water', 'wildcard-matching', 'jump-game-ii', 'n-queens',
+                'n-queens-ii', 'text-justification', 'edit-distance', 'minimum-window-substring',
+                'largest-rectangle-in-histogram', 'maximal-rectangle', 'scramble-string',
+                'merge-sorted-array', 'decode-ways', 'reverse-linked-list-ii',
+                'restore-ip-addresses', 'binary-tree-inorder-traversal', 'unique-binary-search-trees-ii',
+                'validate-binary-search-tree', 'recover-binary-search-tree', 'same-tree',
+                'symmetric-tree', 'binary-tree-level-order-traversal', 'binary-tree-zigzag-level-order-traversal',
+                'maximum-depth-of-binary-tree', 'construct-binary-tree-from-preorder-and-inorder-traversal',
+                'construct-binary-tree-from-inorder-and-postorder-traversal', 'binary-tree-level-order-traversal-ii',
+                'convert-sorted-array-to-binary-search-tree', 'convert-sorted-list-to-binary-search-tree',
+                'balanced-binary-tree', 'minimum-depth-of-binary-tree', 'path-sum',
+                'path-sum-ii', 'flatten-binary-tree-to-linked-list', 'distinct-subsequences',
+                'populating-next-right-pointers-in-each-node', 'populating-next-right-pointers-in-each-node-ii',
+                'pascals-triangle', 'pascals-triangle-ii', 'triangle', 'best-time-to-buy-and-sell-stock',
+                'best-time-to-buy-and-sell-stock-ii', 'best-time-to-buy-and-sell-stock-iii',
+                'binary-tree-maximum-path-sum', 'valid-palindrome', 'word-ladder-ii',
+                'word-ladder', 'longest-consecutive-sequence', 'sum-root-to-leaf-numbers'
+            ]
+        };
     }
 
-    async getRandomProblem() {
-        try {
-            // First try to get a random problem directly
-            try {
-                const variables = {
-                    categorySlug: 'all-code-essentials',
-                    filters: {
-                        difficulty: 'EASY',
-                        status: 'NOT_STARTED'
-                    }
-                };
-                const data = await this.client.request(GET_RANDOM_PROBLEM, variables);
-                if (data.randomQuestion) {
-                    return data.randomQuestion;
-                }
-            } catch (error) {
-                console.log('Random question query failed, trying alternative approach...');
-            }
-
-            // Fallback: get a list of problems and pick one randomly
-            const variables = {
-                categorySlug: 'all-code-essentials',
-                filters: {
-                    difficulty: 'EASY',
-                    status: 'NOT_STARTED'
-                },
-                limit: 50
-            };
-
-            const data = await this.client.request(GET_PROBLEMS_LIST, variables);
-            if (data.problemsetQuestionListV2 && data.problemsetQuestionListV2.questions.length > 0) {
-                const randomIndex = Math.floor(Math.random() * data.problemsetQuestionListV2.questions.length);
-                const randomProblem = data.problemsetQuestionListV2.questions[randomIndex];
-
-                // Now fetch the full problem details
-                return await this.getProblemBySlug(randomProblem.titleSlug);
-            }
-
-            return null;
-        } catch (error) {
-            console.error('Error fetching random problem:', error);
-            return null;
-        }
+      async getRandomProblem() {
+    try {
+      // Pick a random difficulty first
+      const difficulties = ['Easy', 'Medium', 'Hard'];
+      const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+      
+      console.log(`🎲 Randomly selected difficulty: ${randomDifficulty}`);
+      
+      // Use the predefined problem list approach
+      return await this.getProblemByDifficulty(randomDifficulty);
+      
+    } catch (error) {
+      console.error('Error fetching random problem:', error);
+      return null;
     }
+  }
 
     async getProblemBySlug(titleSlug) {
         try {
@@ -251,90 +290,94 @@ ${solution}`;
         return counts;
     }
 
-    // Get a problem of specific difficulty
-    async getProblemByDifficulty(targetDifficulty) {
-        try {
-            // Try to get a problem of the target difficulty
-            const variables = {
-                categorySlug: 'all-code-essentials',
-                filters: {
-                    difficulty: targetDifficulty,
-                    status: 'NOT_STARTED'
-                },
-                limit: 50
-            };
-
-            const data = await this.client.request(GET_PROBLEMS_LIST, variables);
-            if (data.problemsetQuestionListV2 && data.problemsetQuestionListV2.questions.length > 0) {
-                // Filter out already solved problems
-                const unsolvedProblems = data.problemsetQuestionListV2.questions.filter(
-                    q => !this.isProblemSolved(q.titleSlug)
-                );
-
-                if (unsolvedProblems.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * unsolvedProblems.length);
-                    const randomProblem = unsolvedProblems[randomIndex];
-
-                    // Now fetch the full problem details
-                    return await this.getProblemBySlug(randomProblem.titleSlug);
-                }
-            }
-
-            return null;
-        } catch (error) {
-            console.error(`Error fetching ${targetDifficulty} problem:`, error);
-            return null;
-        }
+      // Get a problem of specific difficulty
+  async getProblemByDifficulty(targetDifficulty) {
+    try {
+      const problemList = this.problemsByDifficulty[targetDifficulty];
+      if (!problemList || problemList.length === 0) {
+        console.log(`❌ No problems available for difficulty: ${targetDifficulty}`);
+        return null;
+      }
+      
+      // Filter out already solved problems
+      const unsolvedProblems = problemList.filter(slug => !this.isProblemSolved(slug));
+      
+      console.log(`🔍 Found ${unsolvedProblems.length} unsolved ${targetDifficulty} problems out of ${problemList.length} total`);
+      
+      if (unsolvedProblems.length === 0) {
+        console.log(`⚠️  All ${targetDifficulty} problems have been solved!`);
+        return null;
+      }
+      
+      // Pick a random unsolved problem
+      const randomIndex = Math.floor(Math.random() * unsolvedProblems.length);
+      const selectedSlug = unsolvedProblems[randomIndex];
+      
+      console.log(`🎯 Selected problem: ${selectedSlug}`);
+      
+      // Fetch the full problem details
+      return await this.getProblemBySlug(selectedSlug);
+      
+    } catch (error) {
+      console.error(`Error fetching ${targetDifficulty} problem:`, error);
+      return null;
     }
+  }
 
-    // Solve problems ensuring all difficulties are covered
-    async solveProblemsWithDifficultyBalance(targetCount = 6) {
-        const solvedCounts = this.getSolvedProblemsCount();
-        console.log('📊 Current solved problems:', solvedCounts);
-
-        const targetPerDifficulty = Math.ceil(targetCount / 3);
-        let totalSolved = 0;
-
-        // Use a simpler approach: solve random problems and track difficulties
-        const attempts = targetCount * 3; // Allow more attempts to get variety
-
-        for (let i = 0; i < attempts && totalSolved < targetCount; i++) {
-            const problem = await this.getRandomProblem();
-            if (problem && !this.isProblemSolved(problem.titleSlug)) {
-                const difficulty = problem.difficulty.toLowerCase();
-                const currentCount = solvedCounts[difficulty];
-
-                // Only solve if we need more of this difficulty
-                if (currentCount < targetPerDifficulty) {
-                    console.log(`\n📝 Problem: ${problem.title}`);
-                    console.log(`🏷️  Difficulty: ${problem.difficulty}`);
-
-                    const solution = await this.generateSolution(problem);
-                    if (solution) {
-                        const filepath = this.saveSolution(problem, solution);
-                        console.log(`💾 Solution saved to: ${filepath}`);
-                        totalSolved++;
-                        solvedCounts[difficulty]++;
-
-                        // Check if we've reached our target
-                        if (totalSolved >= targetCount) break;
-                    }
-                }
+      // Solve problems ensuring all difficulties are covered
+  async solveProblemsWithDifficultyBalance(targetCount = 6) {
+    const solvedCounts = this.getSolvedProblemsCount();
+    console.log('📊 Current solved problems:', solvedCounts);
+    
+    const targetPerDifficulty = Math.ceil(targetCount / 3);
+    let totalSolved = 0;
+    
+    const difficulties = ['Easy', 'Medium', 'Hard'];
+    
+    // Solve problems for each difficulty level
+    for (const difficulty of difficulties) {
+      const currentCount = solvedCounts[difficulty.toLowerCase()];
+      const needed = Math.max(0, targetPerDifficulty - currentCount);
+      
+      if (needed > 0 && totalSolved < targetCount) {
+        console.log(`\n🎯 Solving ${needed} ${difficulty} problems...`);
+        
+        for (let i = 0; i < needed && totalSolved < targetCount; i++) {
+          console.log(`\n🔍 Fetching ${difficulty} problem...`);
+          const problem = await this.getProblemByDifficulty(difficulty);
+          
+          if (problem && !this.isProblemSolved(problem.titleSlug)) {
+            console.log(`📝 Problem: ${problem.title}`);
+            console.log(`🏷️  Difficulty: ${problem.difficulty}`);
+            
+            const solution = await this.generateSolution(problem);
+            if (solution) {
+              const filepath = this.saveSolution(problem, solution);
+              console.log(`💾 Solution saved to: ${filepath}`);
+              totalSolved++;
+              solvedCounts[difficulty.toLowerCase()]++;
             }
-
-            // Wait between requests
-            if (i < attempts - 1) {
-                console.log('⏳ Waiting 2 seconds...');
-                await new Promise(resolve => setTimeout(resolve, 2000));
-            }
+          } else if (problem) {
+            console.log(`⚠️  Problem "${problem.title}" already solved, trying another...`);
+          } else {
+            console.log(`❌ Could not fetch ${difficulty} problem, trying another...`);
+          }
+          
+          // Wait between requests
+          if (i < needed - 1) {
+            console.log('⏳ Waiting 2 seconds...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
         }
-
-        console.log(`\n✅ Completed! Total problems solved: ${totalSolved}`);
-        const finalCounts = this.getSolvedProblemsCount();
-        console.log('📊 Final solved problems:', finalCounts);
-
-        return totalSolved;
+      }
     }
+    
+    console.log(`\n✅ Completed! Total problems solved: ${totalSolved}`);
+    const finalCounts = this.getSolvedProblemsCount();
+    console.log('📊 Final solved problems:', finalCounts);
+    
+    return totalSolved;
+  }
 
     async solveRandomProblem() {
         console.log('🎯 Fetching a random LeetCode problem...');
@@ -416,18 +459,18 @@ ${solution}`;
 
 // Main execution
 async function main() {
-  const bot = new LeetCodeBot();
-  
-  // Check if a specific problem slug was provided as command line argument
-  const args = process.argv.slice(2);
-  
-  if (args.length > 0) {
-    await bot.solveSpecificProblem(args[0]);
-  } else {
-    // Automatically solve problems with difficulty balance
-    console.log('🤖 Starting automated LeetCode solving...');
-    await bot.solveProblemsWithDifficultyBalance(3);
-  }
+    const bot = new LeetCodeBot();
+
+    // Check if a specific problem slug was provided as command line argument
+    const args = process.argv.slice(2);
+
+    if (args.length > 0) {
+        await bot.solveSpecificProblem(args[0]);
+    } else {
+        // Automatically solve problems with difficulty balance
+        console.log('🤖 Starting automated LeetCode solving...');
+        await bot.solveProblemsWithDifficultyBalance(3);
+    }
 }
 
 if (require.main === module) {
