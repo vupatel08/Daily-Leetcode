@@ -1,13 +1,14 @@
-# LeetCode Bot 🤖
+# Daily LeetCode Bot 🤖
 
 An automated bot that fetches LeetCode problems via GraphQL and generates solutions using OpenRouter AI.
 
 ## Features
 
-- 🎯 Fetches random or specific LeetCode problems via GraphQL
+- 🎯 Automatically fetches Easy, Medium, and Hard LeetCode problems
 - 🤖 Generates detailed solutions using OpenRouter (GPT-4o-mini)
-- 💾 Saves solutions as markdown files
-- 🚀 Ready for automation and GitHub integration
+- 📁 Organizes solutions by difficulty in structured folders
+- 🚫 Prevents duplicate solutions with smart tracking
+- 🚀 Fully automated - no manual naming required
 
 ## Setup
 
@@ -17,7 +18,7 @@ An automated bot that fetches LeetCode problems via GraphQL and generates soluti
    ```
 
 2. **Environment variables:**
-   The `.env` file is already configured with your OpenRouter API key.
+   The `.env` file contains your OpenRouter API key.
 
 3. **Test the setup:**
    ```bash
@@ -26,48 +27,53 @@ An automated bot that fetches LeetCode problems via GraphQL and generates soluti
 
 ## Usage
 
-### Solve a random problem:
+### Daily automated solving (3 problems, balanced):
 ```bash
-npm start
+npm run daily
 ```
 
-### Solve a specific problem:
+### Solve multiple problems with difficulty balance:
+```bash
+npm run auto
+node daily-auto.js weekly
+```
+
+### Solve specific problem:
 ```bash
 npm start two-sum
 npm start add-two-numbers
-npm start longest-substring-without-repeating-characters
 ```
 
 ## How it works
 
-1. **Problem Fetching**: Uses LeetCode's GraphQL API to fetch problem details
-2. **AI Generation**: Sends problem to OpenRouter (GPT-4o-mini) for solution generation
-3. **File Output**: Saves complete problem + solution as markdown files
-4. **Automation Ready**: Designed for automated runs and GitHub commits
+1. **Smart Problem Selection**: Uses predefined problem lists to ensure reliability
+2. **Difficulty Balancing**: Automatically ensures all difficulty levels are covered
+3. **AI Generation**: Sends problems to OpenRouter (GPT-4o-mini) for solution generation
+4. **Organized Storage**: Saves solutions in difficulty-based folders
+5. **Duplicate Prevention**: Tracks solved problems to avoid repeats
 
 ## File Structure
 
-- `index.js` - Main bot logic
-- `test.js` - Setup verification
-- `.env` - Environment variables (OpenRouter API key)
-- `package.json` - Dependencies and scripts
+```
+solutions/
+├── easy/     # Easy difficulty solutions
+├── medium/   # Medium difficulty solutions
+└── hard/     # Hard difficulty solutions
+
+- index.js        # Main bot logic
+- daily-auto.js   # Automated solving script
+- test.js         # Setup verification
+- .env           # Environment variables
+```
 
 ## Output Format
 
-Each solution is saved as `{problem-slug}_solution.md` containing:
+Each solution is saved as `{DIFFICULTY}_{problem-slug}.md` containing:
 - Problem title and difficulty
 - Problem description
 - Example test cases
 - AI-generated solution with explanations
 - Time/space complexity analysis
-
-## Next Steps
-
-This bot is ready for:
-- Automated daily runs
-- GitHub integration
-- CI/CD pipeline setup
-- Custom problem selection logic
 
 ## Dependencies
 
