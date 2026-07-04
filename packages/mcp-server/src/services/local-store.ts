@@ -2,13 +2,14 @@ import { randomUUID } from 'crypto';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { dirname, join } from 'path';
-import { Decision, ExtractedDecision } from '@groundwork/shared';
+import { Decision, ExtractedDecision, DecisionRelationship, RelationshipType } from '@groundwork/shared';
 import { DecisionStore, DecisionStats } from './store';
 
 interface LocalData {
   decisions: Decision[];
   injections: { decisionId: string; sessionId: string; developerId?: string; tool?: string; at: string }[];
   conflicts: { id: string; decision1Id: string; decision2Id: string; description: string; detectedAt: string; resolvedAt?: string }[];
+  relationships: DecisionRelationship[];
 }
 
 /**
@@ -20,7 +21,7 @@ interface LocalData {
  */
 export class LocalStore implements DecisionStore {
   private filePath: string;
-  private data: LocalData = { decisions: [], injections: [], conflicts: [] };
+  private data: LocalData = { decisions: [], injections: [], conflicts: [], relationships: [] };
 
   constructor(projectPath: string = process.cwd()) {
     this.filePath = join(projectPath, '.groundwork', 'decisions.json');
@@ -35,9 +36,10 @@ export class LocalStore implements DecisionStore {
           decisions: (parsed.decisions || []).map(this.reviveDates),
           injections: parsed.injections || [],
           conflicts: parsed.conflicts || [],
+          relationships: (parsed.relationships || []).map((r: any) => ({ ...r, createdAt: new Date(r.createdAt) })),
         };
       } catch {
-        this.data = { decisions: [], injections: [], conflicts: [] };
+        this.data = { decisions: [], injections: [], conflicts: [], relationships: [] };
       }
     } else {
       await mkdir(dirname(this.filePath), { recursive: true });
@@ -167,6 +169,31 @@ export class LocalStore implements DecisionStore {
 
   async getConflicts(): Promise<any[]> {
     return this.data.conflicts;
+  }
+
+  async saveRelationship(sourceId: string, targetId: string, type: RelationshipType): Promise<void> {
+    if (sourceId === targetId) return;
+    const exists = this.data.relationships.find(
+      (r) => r.sourceId === sourceId && r.targetId === targetId && r.relationshipType === type
+    );
+    if (exists) return;
+    this.data.relationships.push({
+      id: randomUUID(),
+      sourceId,
+      targetId,
+      relationshipType: type,
+      createdAt: new Date(),
+    });
+    await this.persist();
+  }
+
+  async getRelationships(): Promise<DecisionRelationship[]> {
+    return this.data.relationships;
+  }
+
+  async clearRelationships(): Promise<void> {
+    this.data.relationships = [];
+    await this.persist();
   }
 
   async getStats(): Promise<DecisionStats> {

@@ -118,6 +118,22 @@ export function createServer(options: ApiOptions = {}) {
     })
   );
 
+  // Decision graph (nodes + edges) for visualization
+  app.get(
+    '/api/graph',
+    withEngine(async (_req, res) => {
+      res.json(await engine.getGraph());
+    })
+  );
+
+  // Timeline of decisions, newest first
+  app.get(
+    '/api/timeline',
+    withEngine(async (_req, res) => {
+      res.json(await engine.getTimeline());
+    })
+  );
+
   // Injection preview
   app.post(
     '/api/inject',
@@ -136,12 +152,22 @@ export function createServer(options: ApiOptions = {}) {
     })
   );
 
-  // Trigger a project rescan
+  // Trigger a project rescan (also rebuilds the relationship graph)
   app.post(
     '/api/scan',
     withEngine(async (_req, res) => {
       const decisions = await engine.scanProject();
-      res.json({ scanned: decisions.length });
+      const graph = await engine.getGraph();
+      res.json({ scanned: decisions.length, edges: graph.edges.length });
+    })
+  );
+
+  // Rebuild only the relationship graph
+  app.post(
+    '/api/graph/rebuild',
+    withEngine(async (_req, res) => {
+      const edges = await engine.buildGraph();
+      res.json({ edges });
     })
   );
 
@@ -156,8 +182,9 @@ export function createServer(options: ApiOptions = {}) {
 
 if (require.main === module) {
   const port = parseInt(process.env.PORT || '4000', 10);
-  const { app } = createServer({ port });
+  const projectPath = process.env.PROJECT_PATH || process.cwd();
+  const { app } = createServer({ port, projectPath });
   app.listen(port, () => {
-    console.log(`[Groundwork API] listening on http://localhost:${port}`);
+    console.log(`[Groundwork API] listening on http://localhost:${port} (project: ${projectPath})`);
   });
 }

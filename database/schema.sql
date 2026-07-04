@@ -33,7 +33,8 @@ CREATE TABLE decision_relationships (
   relationship_type VARCHAR(50) NOT NULL CHECK (relationship_type IN ('DEPENDS_ON', 'CONSTRAINS', 'CONFLICTS_WITH', 'SUPERSEDES')),
   strength FLOAT CHECK (strength >= 0 AND strength <= 1),
   created_at TIMESTAMP DEFAULT NOW(),
-  CONSTRAINT no_self_reference CHECK (source_id != target_id)
+  CONSTRAINT no_self_reference CHECK (source_id != target_id),
+  CONSTRAINT unique_relationship UNIQUE (source_id, target_id, relationship_type)
 );
 
 -- Injection history: Track when decisions are injected into AI sessions
