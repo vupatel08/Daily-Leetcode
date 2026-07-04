@@ -1,0 +1,30 @@
+{
+  "name": "@groundwork/cli",
+  "version": "0.1.0",
+  "description": "Groundwork CLI - Initialize and manage Groundwork in your project",
+  "main": "dist/index.js",
+  "bin": {
+    "groundwork": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "groundwork",
+    "cli",
+    "ai-coding"
+  ],
+  "author": "Groundwork",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "typescript": "^5.3.3"
+  }
+}
