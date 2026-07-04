@@ -7,6 +7,10 @@
 export { Groundwork } from './groundwork';
 export type { GroundworkOptions } from './groundwork';
 export { GroundworkMCPServer } from './mcp-server';
+export { SlackNotifier, NullNotifier, createNotifier } from './notifications/notifier';
+export type { Notifier } from './notifications/notifier';
+export { loadConfig, DEFAULT_CONFIG } from './config';
+export type { GroundworkConfig } from './config';
 export { ExtractionPipeline } from './extractors/pipeline';
 export { InjectionEngine } from './injection/engine';
 export { ConflictDetector } from './services/conflict-detector';

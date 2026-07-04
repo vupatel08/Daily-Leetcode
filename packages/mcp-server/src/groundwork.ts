@@ -5,12 +5,17 @@ import { ConflictDetector, PotentialConflict } from './services/conflict-detecto
 import { ExtractionPipeline } from './extractors/pipeline';
 import { InjectionEngine } from './injection/engine';
 import { SessionExtractor, ConversationMessage, LLMClient } from './extraction/session-extractor';
+import { Notifier, createNotifier } from './notifications/notifier';
 
 export interface GroundworkOptions {
   projectPath?: string;
   store?: StoreKind;
   llm?: LLMClient;
   maxInjectedDecisions?: number;
+  /** Slack webhook URL for conflict/decision notifications */
+  slackWebhook?: string;
+  /** Provide a custom notifier (overrides slackWebhook) */
+  notifier?: Notifier;
 }
 
 /**
@@ -26,6 +31,7 @@ export class Groundwork {
   private injection: InjectionEngine;
   private session: SessionExtractor;
   private conflicts: ConflictDetector;
+  private notifier: Notifier;
   private projectPath: string;
 
   constructor(options: GroundworkOptions = {}) {
@@ -35,6 +41,7 @@ export class Groundwork {
     this.injection = new InjectionEngine(options.maxInjectedDecisions ?? 15);
     this.session = new SessionExtractor(options.llm);
     this.conflicts = new ConflictDetector();
+    this.notifier = options.notifier || createNotifier(options.slackWebhook);
   }
 
   async init(): Promise<void> {
@@ -76,6 +83,10 @@ export class Groundwork {
         // Mark both as disputed so neither is enforced until resolved
         await this.store.updateStatus(conflict.existing.id, 'DISPUTED');
         await this.store.updateStatus(savedDecision.id, 'DISPUTED');
+        await this.notifier.notifyConflict(
+          conflict.description,
+          `Existing: "${conflict.existing.title}" vs incoming: "${savedDecision.title}"`
+        );
       }
     }
 
