@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm install
+
+      - name: Build shared
+        run: npm run build --workspace=@groundwork/shared
+
+      - name: Build engine
+        run: npm run build --workspace=@groundwork/mcp-server
+
+      - name: Build CLI
+        run: npm run build --workspace=@groundwork/cli
+
+      - name: Build API
+        run: npm run build --workspace=@groundwork/api
+
+      - name: Test
+        run: npm test --workspace=@groundwork/mcp-server

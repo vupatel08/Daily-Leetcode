@@ -4,17 +4,20 @@
   "description": "Groundwork GitHub Action for PR enforcement",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && ncc build dist/index.js -o dist-action",
+    "build": "tsc",
+    "package": "ncc build src/index.ts -o dist-action --minify",
     "test": "jest"
   },
   "author": "Groundwork",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.1",
-    "@actions/github": "^6.0.0"
+    "@actions/github": "^6.0.0",
+    "@groundwork/mcp-server": "*"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.38.1",
+    "@types/node": "^20.10.0",
     "typescript": "^5.3.3"
   }
 }

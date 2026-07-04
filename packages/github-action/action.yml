@@ -1,0 +1,30 @@
+name: 'Groundwork Decision Check'
+description: 'Block PRs that violate your team architectural decisions'
+author: 'Groundwork'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  github-token:
+    description: 'GitHub token used to read the PR diff and post comments'
+    required: true
+    default: ${{ github.token }}
+  fail-on-p0:
+    description: 'Fail the check when a critical (P0) violation is found'
+    required: false
+    default: 'true'
+  project-path:
+    description: 'Path to the project root'
+    required: false
+    default: '.'
+
+outputs:
+  violations:
+    description: 'Total number of violations found'
+  p0:
+    description: 'Number of critical (P0) violations found'
+
+runs:
+  using: 'node20'
+  main: 'dist-action/index.js'

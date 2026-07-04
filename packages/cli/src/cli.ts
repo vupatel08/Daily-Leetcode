@@ -3,9 +3,10 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import { spawn } from 'child_process';
+import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { Groundwork } from '@groundwork/mcp-server';
 
 const program = new Command();
 
@@ -16,74 +17,62 @@ program
 
 program
   .command('init')
-  .description('Initialize Groundwork in your project')
+  .description('Initialize Groundwork in your project and run the first scan')
   .option('-p, --path <path>', 'Project path', process.cwd())
   .action(async (options) => {
     const projectPath = options.path;
     const spinner = ora('Initializing Groundwork...').start();
 
     try {
-      // Check if database is running
-      spinner.text = 'Checking database connection...';
-      
-      // Run the MCP server initialization
+      const gw = new Groundwork({ projectPath, store: 'local' });
+      await gw.init();
+
       spinner.text = 'Scanning project for decisions...';
-      
-      // TODO: Call MCP server initialization
-      // For now, simulate the process
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      spinner.succeed('Groundwork initialized successfully!');
-      
-      console.log('\n' + chalk.green('✓') + ' Found and extracted decisions from:');
-      console.log('  - CLAUDE.md (if exists)');
-      console.log('  - package.json (coming soon)');
-      console.log('  - Database schema (coming soon)');
-      console.log('\n' + chalk.blue('ℹ') + ' Run ' + chalk.cyan('groundwork status') + ' to see extracted decisions');
+      const decisions = await gw.scanProject();
+      const stats = await gw.getStats();
+      await gw.close();
+
+      // Write a starter config
+      const configDir = join(projectPath, '.groundwork');
+      if (!existsSync(join(configDir, 'config.json'))) {
+        await mkdir(configDir, { recursive: true });
+        await writeFile(
+          join(configDir, 'config.json'),
+          JSON.stringify({ version: 1, store: 'local', enforcement: { failOnP0: true, warnOnP1: true } }, null, 2)
+        );
+      }
+
+      spinner.succeed(`Groundwork initialized — extracted ${decisions.length} decisions`);
+
+      console.log('\n' + chalk.bold('Decision summary:'));
+      console.log('  Total:  ' + chalk.green(stats.total));
+      console.log('  P0:     ' + chalk.red(stats.byPriority.P0 || 0));
+      console.log('  P1:     ' + chalk.yellow(stats.byPriority.P1 || 0));
+      console.log('  P2:     ' + chalk.gray(stats.byPriority.P2 || 0));
       console.log('\n' + chalk.yellow('Next steps:'));
-      console.log('  1. Start PostgreSQL: ' + chalk.cyan('docker-compose up -d'));
-      console.log('  2. Run extraction: ' + chalk.cyan('groundwork extract'));
-      console.log('  3. View decisions: ' + chalk.cyan('groundwork status'));
-      console.log('  4. Visit https://app.groundwork.dev (coming soon)');
+      console.log('  1. Connect your AI tools:  ' + chalk.cyan('groundwork connect'));
+      console.log('  2. View decisions:         ' + chalk.cyan('groundwork status'));
     } catch (error: any) {
       spinner.fail('Failed to initialize Groundwork');
       console.error(chalk.red(error.message));
-      console.log('\n' + chalk.yellow('Make sure PostgreSQL is running:'));
-      console.log('  ' + chalk.cyan('docker-compose up -d'));
       process.exit(1);
     }
   });
 
 program
-  .command('extract')
-  .description('Extract decisions from current project')
+  .command('scan')
+  .description('Re-scan the project and update the decision graph')
   .option('-p, --path <path>', 'Project path', process.cwd())
   .action(async (options) => {
-    const spinner = ora('Extracting decisions...').start();
-    
+    const spinner = ora('Scanning project...').start();
     try {
-      const mcpServer = join(__dirname, '../../mcp-server/dist/index.js');
-      
-      if (!existsSync(mcpServer)) {
-        throw new Error('MCP server not built. Run: npm run build');
-      }
-      
-      // Run MCP server extraction
-      const child = spawn('node', [mcpServer, options.path], {
-        stdio: 'inherit'
-      });
-      
-      child.on('close', (code) => {
-        if (code === 0) {
-          spinner.succeed('Extraction complete');
-        } else {
-          spinner.fail('Extraction failed');
-          process.exit(code || 1);
-        }
-      });
-      
+      const gw = new Groundwork({ projectPath: options.path, store: 'local' });
+      await gw.init();
+      const decisions = await gw.scanProject();
+      await gw.close();
+      spinner.succeed(`Scan complete — ${decisions.length} decisions in graph`);
     } catch (error: any) {
-      spinner.fail('Failed to extract decisions');
+      spinner.fail('Scan failed');
       console.error(chalk.red(error.message));
       process.exit(1);
     }
@@ -91,12 +80,57 @@ program
 
 program
   .command('status')
-  .description('Show Groundwork status and statistics')
+  .description('Show the decision graph')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .action(async (options) => {
+    try {
+      const gw = new Groundwork({ projectPath: options.path, store: 'local' });
+      await gw.init();
+      const decisions = await gw.store.getAllDecisions();
+      const conflicts = await gw.store.getConflicts();
+      await gw.close();
+
+      console.log(chalk.bold('\nGroundwork Decision Graph\n'));
+      if (decisions.length === 0) {
+        console.log(chalk.gray('No decisions yet. Run ') + chalk.cyan('groundwork scan'));
+        return;
+      }
+
+      for (const d of decisions) {
+        const tag =
+          d.priority === 'P0' ? chalk.red('P0') : d.priority === 'P1' ? chalk.yellow('P1') : chalk.gray('P2');
+        const status = d.status === 'ACTIVE' ? chalk.green(d.status) : chalk.magenta(d.status);
+        console.log(`  [${tag}] ${d.title}  ${chalk.gray('(' + d.domain + ', ' + status + ')')}`);
+      }
+
+      if (conflicts.length > 0) {
+        console.log(chalk.bold.red(`\n${conflicts.length} unresolved conflict(s):`));
+        conflicts.forEach((c: any) => console.log('  ⚠️  ' + c.description));
+      }
+    } catch (error: any) {
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
+program
+  .command('connect')
+  .description('Print MCP configuration for your AI coding tools')
   .action(async () => {
-    console.log(chalk.bold('Groundwork Status\n'));
-    console.log('Project: ' + chalk.cyan(process.cwd()));
-    console.log('Database: ' + chalk.yellow('Check with: docker-compose ps'));
-    console.log('\n' + chalk.gray('Run ') + chalk.cyan('groundwork extract') + chalk.gray(' to scan for decisions'));
+    const mcpBin = 'groundwork-mcp';
+    console.log(chalk.bold('\nConnect Groundwork to your AI tools via MCP\n'));
+    console.log('Add this to your MCP configuration (Claude Code / Cursor):\n');
+    console.log(
+      chalk.cyan(
+        JSON.stringify(
+          { mcpServers: { groundwork: { command: mcpBin } } },
+          null,
+          2
+        )
+      )
+    );
+    console.log('\n' + chalk.gray('Claude Code: ~/.config/claude/mcp.json'));
+    console.log(chalk.gray('Cursor:      .cursor/mcp.json in your project'));
   });
 
 program.parse(process.argv);

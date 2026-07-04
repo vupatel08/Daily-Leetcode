@@ -138,14 +138,20 @@ This covers 80% of team decisions with a focused, shippable scope.
 
 ## Roadmap
 
-### V1 - MVP (Now)
-- [x] MCP server for Claude Code + Cursor
-- [x] Decision extraction (schema, architecture, tooling)
-- [x] Decision graph (Postgres + pgvector)
-- [x] Real-time injection
-- [x] Conflict detection
-- [x] GitHub Action PR enforcement
-- [x] Dashboard (decisions + conflicts + timeline)
+### V1 - MVP (Implemented ✅)
+- [x] MCP server exposing 4 tools for Claude Code + Cursor
+- [x] Decision extraction: CLAUDE.md, package.json, Prisma schema, git history, CI config
+- [x] Extraction pipeline with cross-source dedupe
+- [x] Decision store: local JSON (zero-dep) or Postgres + pgvector
+- [x] Priority-aware, relevance-ranked injection
+- [x] Conflict detection (rule-based, high-precision)
+- [x] Session extraction (heuristic + optional LLM)
+- [x] GitHub Action PR enforcement (blocks P0 violations)
+- [x] Cloud API + React dashboard (decisions + conflicts + stats)
+- [x] Slack notifications + config system
+- [x] 27 passing tests
+
+See [QUICKSTART.md](./QUICKSTART.md) to run it.
 
 ### V2 - Months 4-6
 - [ ] Windsurf, Codex, Copilot support
@@ -185,13 +191,30 @@ This covers 80% of team decisions with a focused, shippable scope.
 - Open source MCP server (Apache 2.0) - fully auditable
 - On-premises deployment available for Enterprise
 
+## Repository Layout
+
+```
+packages/
+  shared/         # Shared TypeScript types
+  mcp-server/     # Core engine + MCP server (extraction, injection,
+                  #   conflict detection, PR checker, stores, notifier)
+  cli/            # groundwork CLI (init, scan, status, connect)
+  api/            # Express API + React dashboard
+  github-action/  # PR enforcement GitHub Action
+  landing/        # Marketing landing page
+database/         # Postgres schema (pgvector)
+example/          # Sample project used for demos/tests
+docs/             # Product, architecture, business, SDD integration
+```
+
 ## Documentation
 
+- [Quickstart](./QUICKSTART.md) - Run Groundwork in minutes
+- [Development Setup](./DEVELOPMENT.md) - Local dev environment
 - [Full Product Document](./docs/PRODUCT.md) - Complete vision and architecture
 - [Technical Architecture](./docs/ARCHITECTURE.md) - System design details
 - [MVP Specification](./docs/MVP.md) - What gets built first
-- [Decision Graph Design](./docs/DECISION_GRAPH.md) - Core data structure
-- [Integration Guide](./docs/INTEGRATIONS.md) - How to connect AI tools
+- [SDD Integration](./docs/SDD_INTEGRATION.md) - How Groundwork fits with SDD tools
 
 ## Contributing
 
