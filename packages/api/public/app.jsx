@@ -99,6 +99,113 @@ function ConflictsTab() {
   );
 }
 
+const EDGE_COLORS = {
+  CONSTRAINS: '#5b8cff',
+  DEPENDS_ON: '#3ddc84',
+  CONFLICTS_WITH: '#ff5c5c',
+  SUPERSEDES: '#c77dff',
+};
+const PRIORITY_COLORS = { P0: '#ff5c5c', P1: '#ffb84d', P2: '#6b7688' };
+
+function GraphTab() {
+  const { data: graph, loading } = useApi('/api/graph');
+  const [hover, setHover] = useState(null);
+
+  if (loading) return <div className="loading">Building graph…</div>;
+  if (!graph || graph.nodes.length === 0)
+    return <div className="empty">No graph yet. Run <code>groundwork scan</code>.</div>;
+
+  // Circular layout
+  const size = 620;
+  const cx = size / 2, cy = size / 2, r = size / 2 - 60;
+  const n = graph.nodes.length;
+  const pos = {};
+  graph.nodes.forEach((node, i) => {
+    const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+    pos[node.id] = { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle), node };
+  });
+
+  const connected = new Set();
+  if (hover) {
+    graph.edges.forEach((e) => {
+      if (e.source === hover || e.target === hover) { connected.add(e.source); connected.add(e.target); }
+    });
+  }
+
+  return (
+    <div>
+      <div className="legend">
+        {Object.entries(EDGE_COLORS).map(([type, color]) => (
+          <span key={type} className="legend-item">
+            <span className="swatch" style={{ background: color }}></span>{type}
+          </span>
+        ))}
+      </div>
+      <div className="graph-wrap">
+        <svg viewBox={`0 0 ${size} ${size}`} className="graph-svg">
+          {graph.edges.map((e, i) => {
+            const s = pos[e.source], t = pos[e.target];
+            if (!s || !t) return null;
+            const dim = hover && e.source !== hover && e.target !== hover;
+            return (
+              <line key={i} x1={s.x} y1={s.y} x2={t.x} y2={t.y}
+                stroke={EDGE_COLORS[e.type] || '#555'} strokeWidth={dim ? 0.4 : 1.4}
+                opacity={dim ? 0.12 : 0.7} />
+            );
+          })}
+          {graph.nodes.map((node) => {
+            const p = pos[node.id];
+            const dim = hover && hover !== node.id && !connected.has(node.id);
+            return (
+              <g key={node.id} onMouseEnter={() => setHover(node.id)} onMouseLeave={() => setHover(null)}
+                 style={{ cursor: 'pointer' }} opacity={dim ? 0.25 : 1}>
+                <circle cx={p.x} cy={p.y} r={node.priority === 'P0' ? 8 : node.priority === 'P1' ? 6 : 4.5}
+                  fill={PRIORITY_COLORS[node.priority]}
+                  stroke={node.status === 'DISPUTED' ? '#c77dff' : '#0a0c12'} strokeWidth={2} />
+              </g>
+            );
+          })}
+        </svg>
+        {hover && pos[hover] && (
+          <div className="graph-tip">
+            <b>{pos[hover].node.title}</b>
+            <span>{pos[hover].node.domain} · {pos[hover].node.priority} · {pos[hover].node.status}</span>
+          </div>
+        )}
+      </div>
+      <p className="muted graph-caption">
+        {graph.nodes.length} decisions · {graph.edges.length} relationships. Hover a node to trace its connections.
+      </p>
+    </div>
+  );
+}
+
+function TimelineTab() {
+  const { data: timeline, loading } = useApi('/api/timeline');
+  if (loading) return <div className="loading">Loading timeline…</div>;
+  if (!timeline || timeline.length === 0)
+    return <div className="empty">No decisions yet.</div>;
+  return (
+    <div className="timeline">
+      {timeline.map((t) => (
+        <div className="tl-item" key={t.id}>
+          <div className={'tl-dot ' + t.priority}></div>
+          <div className="tl-body">
+            <div className="tl-title">{t.title}</div>
+            <div className="tl-meta">
+              <span className={'pill ' + t.priority}>{t.priority}</span>
+              <span className="tag">{t.domain}</span>
+              <span className={'status ' + t.status}>{t.status}</span>
+              <span>{new Date(t.madeAt).toLocaleString()}</span>
+              <span>src: {t.source}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function App() {
   const [tab, setTab] = useState('decisions');
   const { data: stats, refetch: refetchStats } = useApi('/api/stats');
@@ -144,12 +251,21 @@ function App() {
         <button className={'tab ' + (tab === 'decisions' ? 'active' : '')} onClick={() => setTab('decisions')}>
           Decisions
         </button>
+        <button className={'tab ' + (tab === 'graph' ? 'active' : '')} onClick={() => setTab('graph')}>
+          Graph
+        </button>
+        <button className={'tab ' + (tab === 'timeline' ? 'active' : '')} onClick={() => setTab('timeline')}>
+          Timeline
+        </button>
         <button className={'tab ' + (tab === 'conflicts' ? 'active' : '')} onClick={() => setTab('conflicts')}>
           Conflicts {conflictCount > 0 ? '(' + conflictCount + ')' : ''}
         </button>
       </div>
 
-      {tab === 'decisions' ? <DecisionsTab key={nonce} /> : <ConflictsTab key={nonce} />}
+      {tab === 'decisions' && <DecisionsTab key={nonce} />}
+      {tab === 'graph' && <GraphTab key={nonce} />}
+      {tab === 'timeline' && <TimelineTab key={nonce} />}
+      {tab === 'conflicts' && <ConflictsTab key={nonce} />}
 
       <footer>Groundwork · Layer 3 decision graph · groundwork.dev</footer>
     </div>

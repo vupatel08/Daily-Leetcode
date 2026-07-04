@@ -145,11 +145,12 @@ This covers 80% of team decisions with a focused, shippable scope.
 - [x] Decision store: local JSON (zero-dep) or Postgres + pgvector
 - [x] Priority-aware, relevance-ranked injection
 - [x] Conflict detection (rule-based, high-precision)
+- [x] Relationship graph (CONSTRAINS / DEPENDS_ON / SUPERSEDES / CONFLICTS_WITH)
 - [x] Session extraction (heuristic + optional LLM)
 - [x] GitHub Action PR enforcement (blocks P0 violations)
-- [x] Cloud API + React dashboard (decisions + conflicts + stats)
+- [x] Cloud API + React dashboard (decisions + graph + timeline + conflicts)
 - [x] Slack notifications + config system
-- [x] 27 passing tests
+- [x] 37 passing tests
 
 See [QUICKSTART.md](./QUICKSTART.md) to run it.
 
@@ -213,6 +214,8 @@ docs/             # Product, architecture, business, SDD integration
 - [Development Setup](./DEVELOPMENT.md) - Local dev environment
 - [Full Product Document](./docs/PRODUCT.md) - Complete vision and architecture
 - [Technical Architecture](./docs/ARCHITECTURE.md) - System design details
+- [Decision Graph Design](./docs/DECISION_GRAPH.md) - Core data structure
+- [Integration Guide](./docs/INTEGRATIONS.md) - How to connect AI tools
 - [MVP Specification](./docs/MVP.md) - What gets built first
 - [SDD Integration](./docs/SDD_INTEGRATION.md) - How Groundwork fits with SDD tools
 

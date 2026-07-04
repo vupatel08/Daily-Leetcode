@@ -102,3 +102,31 @@ header.masthead { display: flex; align-items: center; justify-content: space-bet
 .empty { text-align: center; color: var(--muted); padding: 60px 0; }
 .loading { text-align: center; color: var(--muted); padding: 60px 0; }
 footer { margin-top: 40px; text-align: center; color: var(--muted); font-size: 12px; }
+
+/* graph */
+.legend { display: flex; gap: 18px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+.legend-item { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.graph-wrap { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 10px; }
+.graph-svg { width: 100%; height: auto; display: block; }
+.graph-tip {
+  position: absolute; top: 14px; left: 14px; right: 14px; background: var(--panel-2);
+  border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 2px; pointer-events: none;
+}
+.graph-tip b { font-size: 14px; }
+.graph-tip span { font-size: 12px; color: var(--muted); }
+.graph-caption { text-align: center; margin-top: 12px; font-size: 13px; }
+
+/* timeline */
+.timeline { position: relative; padding-left: 8px; }
+.tl-item { display: flex; gap: 14px; padding: 4px 0; align-items: flex-start; }
+.tl-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 16px; flex-shrink: 0; position: relative; }
+.tl-dot::after { content: ''; position: absolute; left: 50%; top: 12px; transform: translateX(-50%); width: 2px; height: 34px; background: var(--border); }
+.tl-item:last-child .tl-dot::after { display: none; }
+.tl-dot.P0 { background: var(--p0); }
+.tl-dot.P1 { background: var(--p1); }
+.tl-dot.P2 { background: var(--p2); }
+.tl-body { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 6px; }
+.tl-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.tl-meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--muted); }

@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { Decision, ExtractedDecision } from '@groundwork/shared';
+import { Decision, ExtractedDecision, DecisionRelationship, RelationshipType } from '@groundwork/shared';
 import { DecisionStore, DecisionStats } from './store';
 
 /**
@@ -113,6 +113,32 @@ export class PostgresStore implements DecisionStore {
   async getConflicts(): Promise<any[]> {
     const r = await this.pool.query(`SELECT * FROM conflicts WHERE resolved_at IS NULL ORDER BY detected_at DESC`);
     return r.rows;
+  }
+
+  async saveRelationship(sourceId: string, targetId: string, type: RelationshipType): Promise<void> {
+    if (sourceId === targetId) return;
+    await this.pool.query(
+      `INSERT INTO decision_relationships (source_id, target_id, relationship_type)
+       VALUES ($1,$2,$3)
+       ON CONFLICT DO NOTHING`,
+      [sourceId, targetId, type]
+    );
+  }
+
+  async getRelationships(): Promise<DecisionRelationship[]> {
+    const r = await this.pool.query(`SELECT * FROM decision_relationships`);
+    return r.rows.map((row) => ({
+      id: row.id,
+      sourceId: row.source_id,
+      targetId: row.target_id,
+      relationshipType: row.relationship_type,
+      strength: row.strength,
+      createdAt: new Date(row.created_at),
+    }));
+  }
+
+  async clearRelationships(): Promise<void> {
+    await this.pool.query(`DELETE FROM decision_relationships`);
   }
 
   async getStats(): Promise<DecisionStats> {
