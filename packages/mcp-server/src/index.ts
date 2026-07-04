@@ -11,6 +11,8 @@ export { ExtractionPipeline } from './extractors/pipeline';
 export { InjectionEngine } from './injection/engine';
 export { ConflictDetector } from './services/conflict-detector';
 export { SessionExtractor } from './extraction/session-extractor';
+export { PRChecker } from './enforcement/pr-checker';
+export type { FileChange, Violation, CheckResult } from './enforcement/pr-checker';
 export { LocalStore } from './services/local-store';
 export { PostgresStore } from './services/postgres-store';
 export { createStore } from './services/store-factory';
