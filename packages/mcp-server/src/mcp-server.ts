@@ -1,6 +1,20 @@
 import { Groundwork } from './groundwork';
 
 /**
+ * Real ESM dynamic import from a CommonJS build.
+ *
+ * `@modelcontextprotocol/sdk` is ESM-only ("type": "module"). If we write a
+ * literal `import('...')`, TypeScript (module: commonjs) down-levels it to
+ * `require(...)`, which throws ERR_REQUIRE_ESM at runtime. Building the import
+ * via `new Function` keeps it as a genuine runtime `import()` that Node loads
+ * as ESM, and also stops `tsc` from trying to statically resolve the module's
+ * types (which is fragile across environments). Types are intentionally `any`.
+ */
+const esmImport = new Function('specifier', 'return import(specifier);') as (
+  specifier: string
+) => Promise<any>;
+
+/**
  * GroundworkMCPServer
  *
  * Exposes Groundwork to any MCP-compatible AI tool (Claude Code, Cursor, ...)
@@ -139,10 +153,10 @@ export class GroundworkMCPServer {
   async start(): Promise<void> {
     await this.engine.init();
 
-    // Dynamic import to bridge ESM-only SDK from our CommonJS build.
-    const { Server } = await import('@modelcontextprotocol/sdk/server/index.js');
-    const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
-    const { CallToolRequestSchema, ListToolsRequestSchema } = await import(
+    // Bridge the ESM-only SDK from our CommonJS build via a real dynamic import.
+    const { Server } = await esmImport('@modelcontextprotocol/sdk/server/index.js');
+    const { StdioServerTransport } = await esmImport('@modelcontextprotocol/sdk/server/stdio.js');
+    const { CallToolRequestSchema, ListToolsRequestSchema } = await esmImport(
       '@modelcontextprotocol/sdk/types.js'
     );
 
