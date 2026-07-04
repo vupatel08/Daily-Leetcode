@@ -1,13 +1,7 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { ExtractedDecision, DecisionDomain, DecisionPriority } from '@groundwork/shared';
-
-export interface Extractor {
-  name: string;
-  priority: number;
-  canExtract(projectPath: string): Promise<boolean>;
-  extract(projectPath: string): Promise<ExtractedDecision[]>;
-}
+import { Extractor } from './types';
 
 /**
  * CLAUDE.md Extractor
@@ -52,13 +46,16 @@ export class ClaudeMdExtractor implements Extractor {
 
     console.log(`[ClaudeMdExtractor] Extracting from ${filename}`);
 
+    // Strip markdown emphasis so "using **PostgreSQL**" matches "using PostgreSQL"
+    content = content.replace(/[*`_]/g, '');
+
     const decisions: ExtractedDecision[] = [];
 
     // Extract framework/stack decisions
     const frameworkPatterns = [
-      { pattern: /using (Next\.js|React|Vue|Angular|Express|Fastify)/gi, domain: 'Framework' as DecisionDomain },
-      { pattern: /built with (Node\.js|Python|Go|Java|Rust)/gi, domain: 'Framework' as DecisionDomain },
-      { pattern: /(TypeScript|JavaScript) project/gi, domain: 'Framework' as DecisionDomain }
+      { pattern: /(?:using|built with|with) (Next\.js|React|Vue|Angular|Express|Fastify|Svelte)/gi, domain: 'Framework' as DecisionDomain },
+      { pattern: /(?:using|built with|with) (Node\.js|Python|Go|Java|Rust)/gi, domain: 'Framework' as DecisionDomain },
+      { pattern: /(TypeScript|JavaScript) (?:project|for)/gi, domain: 'Framework' as DecisionDomain }
     ];
 
     for (const { pattern, domain } of frameworkPatterns) {
@@ -80,9 +77,9 @@ export class ClaudeMdExtractor implements Extractor {
 
     // Extract database decisions
     const dbPatterns = [
-      /using (PostgreSQL|MySQL|MongoDB|Redis|SQLite)/gi,
-      /database: (PostgreSQL|MySQL|MongoDB|Redis|SQLite)/gi,
-      /(Prisma|TypeORM|Sequelize|Mongoose) for database/gi
+      /(?:using|with) (PostgreSQL|MySQL|MongoDB|Redis|SQLite)/gi,
+      /database:?\s*(PostgreSQL|MySQL|MongoDB|Redis|SQLite)/gi,
+      /(Prisma|TypeORM|Sequelize|Mongoose)(?:\s+ORM)?/gi
     ];
 
     for (const pattern of dbPatterns) {
@@ -103,8 +100,8 @@ export class ClaudeMdExtractor implements Extractor {
 
     // Extract authentication decisions
     const authPatterns = [
-      /authentication: (JWT|OAuth|Session)/gi,
-      /using (JWT|OAuth|sessions) for auth/gi,
+      /authentication:?\s*(JWT|OAuth|Session)/gi,
+      /(JWT|OAuth|sessions?)\s+(?:tokens?\s+)?(?:for\s+)?auth/gi,
       /(NextAuth|Passport|Auth0)/gi
     ];
 

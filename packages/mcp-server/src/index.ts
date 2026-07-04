@@ -1,89 +1,32 @@
-import { DatabaseService } from './services/database';
-import { ClaudeMdExtractor } from './extractors/claude-md-extractor';
-
 /**
- * Groundwork MCP Server - Phase 1 Foundation
- * 
- * Currently implements:
- * - Database connection
- * - CLAUDE.md extraction
- * - Basic decision storage
- * 
- * Coming next:
- * - MCP protocol integration
- * - Real-time injection
- * - Conflict detection
+ * @groundwork/mcp-server
+ *
+ * Public entry point. Exports the core engine and MCP server, and when run
+ * directly starts the MCP stdio server (used by Claude Code / Cursor).
  */
-export class GroundworkMCPServer {
-  private db: DatabaseService;
-  private extractors: ClaudeMdExtractor[];
+export { Groundwork } from './groundwork';
+export type { GroundworkOptions } from './groundwork';
+export { GroundworkMCPServer } from './mcp-server';
+export { ExtractionPipeline } from './extractors/pipeline';
+export { InjectionEngine } from './injection/engine';
+export { ConflictDetector } from './services/conflict-detector';
+export { SessionExtractor } from './extraction/session-extractor';
+export { LocalStore } from './services/local-store';
+export { PostgresStore } from './services/postgres-store';
+export { createStore } from './services/store-factory';
+export * from './extractors/pipeline';
 
-  constructor() {
-    this.db = new DatabaseService();
-    this.extractors = [new ClaudeMdExtractor()];
-  }
+import { GroundworkMCPServer } from './mcp-server';
 
-  /**
-   * Initialize: Scan project and extract decisions
-   */
-  async initialize(projectPath: string): Promise<void> {
-    console.log('[Groundwork] Initializing...');
-    
-    // Connect to database
-    await this.db.connect();
-    
-    // Run extractors
-    const allDecisions = [];
-    
-    for (const extractor of this.extractors) {
-      if (await extractor.canExtract(projectPath)) {
-        const decisions = await extractor.extract(projectPath);
-        allDecisions.push(...decisions);
-      }
-    }
-    
-    // Save to database
-    for (const decision of allDecisions) {
-      await this.db.saveDecision(decision);
-    }
-    
-    console.log(`[Groundwork] Extracted ${allDecisions.length} decisions`);
-    
-    // Show stats
-    const stats = await this.db.getStats();
-    console.log('[Groundwork] Decision stats:', stats);
-  }
-
-  /**
-   * Get all active decisions
-   */
-  async getDecisions(): Promise<any[]> {
-    return await this.db.getActiveDecisions();
-  }
-
-  async stop(): Promise<void> {
-    await this.db.disconnect();
-    console.log('[Groundwork] Stopped');
-  }
-}
-
-// Test extraction if run directly
 if (require.main === module) {
   const server = new GroundworkMCPServer();
-  const projectPath = process.argv[2] || process.cwd();
-  
-  server.initialize(projectPath)
-    .then(async () => {
-      console.log('\n[Groundwork] ✓ Initialization complete');
-      const decisions = await server.getDecisions();
-      console.log(`\n[Groundwork] Active decisions: ${decisions.length}`);
-      decisions.slice(0, 5).forEach(d => {
-        console.log(`  - [${d.priority}] ${d.title}`);
-      });
-      await server.stop();
-    })
-    .catch(error => {
-      console.error('[Groundwork] Failed:', error);
-      process.exit(1);
-    });
+  server.start().catch((err) => {
+    console.error('[Groundwork] Failed to start MCP server:', err);
+    process.exit(1);
+  });
+
+  process.on('SIGINT', async () => {
+    await server.stop();
+    process.exit(0);
+  });
 }
