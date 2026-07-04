@@ -206,8 +206,20 @@ function TimelineTab() {
   );
 }
 
+const VALID_TABS = ['decisions', 'graph', 'timeline', 'conflicts'];
+function initialTab() {
+  const q = new URLSearchParams(window.location.search).get('tab');
+  return VALID_TABS.includes(q) ? q : 'decisions';
+}
+
 function App() {
-  const [tab, setTab] = useState('decisions');
+  const [tab, setTabState] = useState(initialTab);
+  const setTab = (t) => {
+    setTabState(t);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', t);
+    window.history.replaceState({}, '', url);
+  };
   const { data: stats, refetch: refetchStats } = useApi('/api/stats');
   const { data: conflicts } = useApi('/api/conflicts');
   const [scanning, setScanning] = useState(false);
