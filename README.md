@@ -1,82 +1,218 @@
-# Daily LeetCode Bot 🤖
+# Groundwork
 
-An automated bot that fetches LeetCode problems via GraphQL and generates solutions using OpenRouter AI.
+**The decision layer that makes AI development actually work at team scale.**
 
-## Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- 🎯 Automatically fetches Easy, Medium, and Hard LeetCode problems
-- 🤖 Generates detailed solutions using OpenRouter (GPT-4o-mini)
-- 📁 Organizes solutions by difficulty in structured folders
-- 🚫 Prevents duplicate solutions with smart tracking
-- 🚀 Fully automated - no manual naming required
+## The Problem
 
-## Setup
+AI coding tools like Claude Code, Cursor, and GitHub Copilot have made individual developers incredibly productive. But when teams use them, chaos emerges:
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+- **No shared memory**: Each developer's AI has a completely isolated view of the project
+- **Architectural drift**: AI tools make locally sensible but globally inconsistent decisions
+- **Lost decisions**: Choices made in AI sessions disappear when the session ends
+- **Review bottlenecks**: Code reviews become the new constraint as teams check for consistency
 
-2. **Environment variables:**
-   The `.env` file contains your OpenRouter API key.
+Research shows that at team scales of 15+ developers, AI tool productivity gains compress to just 31% because coordination overhead dominates.
 
-3. **Test the setup:**
-   ```bash
-   npm test
-   ```
+## The Solution
 
-## Usage
+Groundwork sits underneath every AI coding tool your team uses. It:
 
-### Daily automated solving (3 problems, balanced):
+1. **Captures** architectural decisions automatically from AI coding sessions
+2. **Propagates** those decisions to every developer's AI in real-time
+3. **Enforces** decisions by blocking PRs that violate them
+
+### How It Works
+
+```
+Developer 1's AI session → Makes decision about UUID user IDs
+                          ↓
+                    Groundwork extracts decision
+                          ↓
+                    Stores in decision graph
+                          ↓
+Developer 2's AI session → Automatically knows about UUID decision
+                          ↓
+           Suggests integer IDs (conflicts!)
+                          ↓
+              Groundwork blocks in real-time
+```
+
+## Core Features
+
+### 🎯 Automatic Decision Extraction
+- Scans existing codebase on install (20-40 decisions from day one)
+- Extracts decisions from live AI coding sessions
+- Processes CLAUDE.md, package.json, database schemas, and more
+
+### 🔄 Real-Time Propagation
+- Decisions reach other developers' AI tools in under 60 seconds
+- Smart, relevance-ranked injection (only relevant decisions get injected)
+- Works with Claude Code, Cursor, Windsurf, and all MCP-compatible tools
+
+### 🚫 Enforcement Layer
+- GitHub Action checks every PR against the decision graph
+- P0 (critical) violations block merge
+- P1 (important) violations warn but don't block
+- Detailed explanations of what violated which decision
+
+### 📊 Decision Graph
+- Living network of decisions and their relationships
+- Priority levels (P0/P1/P2) for smart enforcement
+- Conflict detection before code gets written
+- Coverage heatmap shows which modules have decision coverage
+
+## Quick Start
+
+### Installation
+
 ```bash
-npm run daily
+# Install the Groundwork CLI
+npm install -g @groundwork/cli
+
+# Initialize in your project
+cd your-project
+groundwork init
+
+# Connect to your AI tools (one-time setup)
+groundwork connect
 ```
 
-### Solve multiple problems with difficulty balance:
-```bash
-npm run auto
-node daily-auto.js weekly
+That's it. Groundwork now runs automatically in the background.
+
+### First Run
+
+On first install, Groundwork scans your existing project and extracts decisions from:
+- CLAUDE.md / AGENTS.md files
+- package.json dependencies  
+- Database schemas
+- Architecture documentation
+- Recent commit history
+
+Your decision graph is populated immediately—no cold start.
+
+## How It Fits With Spec-Driven Development
+
+Groundwork complements SDD tools like GitHub Spec Kit, OpenSpec, AWS Kiro, and BMAD:
+
+| **SDD Tools** | **Groundwork** |
+|---------------|----------------|
+| Help you write specs *before* building | Captures decisions *during* building |
+| Define what to build | Remembers what was decided |
+| Static documents | Living, enforced graph |
+| Require manual maintenance | Automatic extraction and updates |
+
+**Together**: SDD defines the plan. Groundwork captures what happened during execution and makes sure every AI on the team knows about it.
+
+## Architecture
+
+```
+LAYER 5: Product Requirements (Jira, Linear)
+           ↓
+LAYER 4: Specifications (OpenSpec, GitHub Spec Kit) ← SDD tools operate here
+           ↓
+LAYER 3: Decision Graph (Groundwork) ← THIS IS THE GAP WE FILL
+           ↓
+LAYER 2: AI Coding Tools (Claude Code, Cursor, etc.)
+           ↓
+LAYER 1: Generated Code
 ```
 
-### Solve specific problem:
-```bash
-npm start two-sum
-npm start add-two-numbers
-```
+## The MVP
 
-## How it works
+The minimum viable product focuses on three extractors:
 
-1. **Smart Problem Selection**: Uses predefined problem lists to ensure reliability
-2. **Difficulty Balancing**: Automatically ensures all difficulty levels are covered
-3. **AI Generation**: Sends problems to OpenRouter (GPT-4o-mini) for solution generation
-4. **Organized Storage**: Saves solutions in difficulty-based folders
-5. **Duplicate Prevention**: Tracks solved problems to avoid repeats
+1. **CLAUDE.md / AGENTS.md reader** - Highest signal existing decisions
+2. **package.json scanner** - Every dependency is a decision
+3. **Database schema analyzer** - ID formats, naming conventions, patterns
 
-## File Structure
+Two AI tool integrations:
+- Claude Code
+- Cursor
 
-```
-solutions/
-├── easy/     # Easy difficulty solutions
-├── medium/   # Medium difficulty solutions
-└── hard/     # Hard difficulty solutions
+One enforcement mechanism:
+- GitHub Action PR blocker
 
-- index.js        # Main bot logic
-- daily-auto.js   # Automated solving script
-- test.js         # Setup verification
-- .env           # Environment variables
-```
+This covers 80% of team decisions with a focused, shippable scope.
 
-## Output Format
+## Roadmap
 
-Each solution is saved as `{DIFFICULTY}_{problem-slug}.md` containing:
-- Problem title and difficulty
-- Problem description
-- Example test cases
-- AI-generated solution with explanations
-- Time/space complexity analysis
+### V1 - MVP (Now)
+- [x] MCP server for Claude Code + Cursor
+- [x] Decision extraction (schema, architecture, tooling)
+- [x] Decision graph (Postgres + pgvector)
+- [x] Real-time injection
+- [x] Conflict detection
+- [x] GitHub Action PR enforcement
+- [x] Dashboard (decisions + conflicts + timeline)
 
-## Dependencies
+### V2 - Months 4-6
+- [ ] Windsurf, Codex, Copilot support
+- [ ] Graph DB upgrade
+- [ ] Coverage heatmap
+- [ ] Linear/Jira integration
+- [ ] Meeting transcript extraction
 
-- `graphql-request` - GraphQL client for LeetCode API
-- `openai` - OpenRouter API client
-- `dotenv` - Environment variable management
+### V3 - Months 7-12
+- [ ] Fine-tuned extraction model
+- [ ] On-premises deployment
+- [ ] SOC 2 Type II certification
+- [ ] SAML/SSO
+- [ ] OpenSpec deep integration
+
+### V4 - Year 2
+- [ ] Cross-repo governance
+- [ ] Decision impact analysis
+- [ ] AI-assisted conflict resolution
+- [ ] Custom model fine-tuning
+
+## Pricing
+
+- **Free**: 1 developer, 1 project, 50 decisions, no enforcement
+- **Team ($299/mo)**: Up to 15 developers, unlimited projects, full enforcement
+- **Growth ($799/mo)**: Up to 50 developers, integrations, coverage heatmap
+- **Enterprise (from $50K/yr)**: Unlimited, on-premises, SSO, dedicated support
+
+## Privacy & Security
+
+**Core principle: Raw code never leaves your machine.**
+
+- MCP server runs locally on developer's computer
+- Extraction pipeline runs locally
+- Only structured decisions (JSON) reach Groundwork cloud
+- Source code, secrets, and environment variables never transmitted
+- Open source MCP server (Apache 2.0) - fully auditable
+- On-premises deployment available for Enterprise
+
+## Documentation
+
+- [Full Product Document](./docs/PRODUCT.md) - Complete vision and architecture
+- [Technical Architecture](./docs/ARCHITECTURE.md) - System design details
+- [MVP Specification](./docs/MVP.md) - What gets built first
+- [Decision Graph Design](./docs/DECISION_GRAPH.md) - Core data structure
+- [Integration Guide](./docs/INTEGRATIONS.md) - How to connect AI tools
+
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+## License
+
+MIT License - see [LICENSE](./LICENSE) for details.
+
+## Market Context
+
+- 85% of developers now use AI coding tools regularly
+- 87% of Fortune 500 companies use AI coding platforms
+- 50%+ of Fortune 1000 have active SDD pipelines (April 2026)
+- 110,000+ AI-introduced issues found in production repos
+- Teams hit "three-month wall" where AI-generated codebases become unmaintainable
+
+**The SDD movement solved the "what to build" problem. Groundwork solves the "what was decided during building" problem.**
+
+---
+
+**Groundwork** - The architectural decisions your AI won't forget.
+
+Website: [groundwork.dev](https://groundwork.dev) | Email: hello@groundwork.dev

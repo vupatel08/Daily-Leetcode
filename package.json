@@ -1,27 +1,44 @@
 {
-    "name": "leetcode-bot",
-    "version": "1.0.0",
-    "description": "Automated LeetCode bot that fetches questions and generates solutions using OpenRouter",
-    "main": "index.js",
-      "scripts": {
-    "start": "node index.js",
-    "test": "node test.js",
-    "daily": "node daily-auto.js",
-    "weekly": "node daily-auto.js weekly",
-    "auto": "node daily-auto.js"
+  "name": "@groundwork/monorepo",
+  "version": "0.1.0",
+  "description": "The decision layer that makes AI development actually work at team scale",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "eslint packages/*/src --ext .ts,.tsx",
+    "dev": "npm run dev --workspace=@groundwork/mcp-server",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules"
   },
-    "dependencies": {
-        "graphql": "^16.8.1",
-        "graphql-request": "^6.1.0",
-        "openai": "^4.20.1",
-        "dotenv": "^16.3.1"
-    },
-    "keywords": [
-        "leetcode",
-        "bot",
-        "automation",
-        "openrouter"
-    ],
-    "author": "",
-    "license": "MIT"
+  "keywords": [
+    "ai",
+    "development",
+    "decision-graph",
+    "mcp",
+    "architectural-decisions",
+    "spec-driven-development",
+    "ai-coding-tools",
+    "cursor",
+    "claude-code"
+  ],
+  "author": "Groundwork",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vupatel08/Daily-Leetcode.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  }
 }
