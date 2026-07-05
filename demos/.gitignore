@@ -1,0 +1,9 @@
+node_modules/
+output/
+dist/
+test-results/
+playwright-report/
+*.cast
+*.gif
+*.mp4
+pr-mock.html

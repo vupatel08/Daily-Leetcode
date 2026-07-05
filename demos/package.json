@@ -1,0 +1,26 @@
+{
+  "name": "@groundwork/demos",
+  "version": "0.1.0",
+  "description": "Demo recording scripts for Groundwork — marketing material",
+  "private": true,
+  "scripts": {
+    "demo:conflict":  "ts-node scenarios/01-conflict-catch.ts",
+    "demo:onboard":   "ts-node scenarios/02-onboarding-scan.ts",
+    "demo:pr":        "playwright test scenarios/03-pr-block.spec.ts --headed",
+    "demo:propagate": "ts-node scenarios/04-propagation.ts",
+    "demo:all":       "bash scripts/record-all.sh",
+    "export":         "bash scripts/export-clips.sh"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cli-progress": "^3.12.0",
+    "ora": "^5.4.1",
+    "@playwright/test": "^1.44.0"
+  },
+  "devDependencies": {
+    "@types/cli-progress": "^3.11.5",
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

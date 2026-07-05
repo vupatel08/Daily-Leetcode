@@ -1,0 +1,26 @@
+{
+  "background": "#0d0d0d",
+  "foreground": "#e0e0e0",
+  "palette": [
+    "#0d0d0d",
+    "#ff4444",
+    "#00ff88",
+    "#ffcc00",
+    "#5b8cff",
+    "#c77dff",
+    "#3ddc84",
+    "#e0e0e0",
+    "#333333",
+    "#ff6666",
+    "#44ffaa",
+    "#ffdd44",
+    "#7ba8ff",
+    "#d99fff",
+    "#66ffaa",
+    "#ffffff"
+  ],
+  "font_size": 14,
+  "font_family": "JetBrains Mono, Fira Code, Cascadia Code, monospace",
+  "cursor": "block",
+  "cursor_blink": true
+}
