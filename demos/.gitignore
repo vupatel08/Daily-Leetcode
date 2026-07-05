@@ -1,0 +1,7 @@
+node_modules/
+output/
+dist/
+*.cast
+*.gif
+*.mp4
+pr-mock.html
