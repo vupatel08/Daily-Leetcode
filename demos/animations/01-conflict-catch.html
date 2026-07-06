@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f0f2f5; font-family: 'JetBrains Mono','Fira Code','SF Mono',Consolas,monospace; width: 1100px; }
+  body { padding: 24px; }
+  .win { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.10); border: 1px solid #d0d7de; }
+  .bar { background: #f6f8fa; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #d0d7de; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dr { background: #ff5f57; } .dy { background: #ffbd2e; } .dg { background: #28c840; }
+  .lbl { margin: 0 auto; font-size: 12px; color: #57606a; font-weight: 500; }
+  .term { background: #fff; padding: 20px 24px; font-size: 13px; line-height: 1.65; color: #1f2328; min-height: 480px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0 20px; }
+  .vdiv { background: #d0d7de; }
+  pre { white-space: pre-wrap; word-break: break-word; }
+
+  .green  { color: #1a7f37; }
+  .red    { color: #d1242f; }
+  .amber  { color: #9a6700; }
+  .blue   { color: #0969da; }
+  .muted  { color: #57606a; }
+  .bold   { font-weight: 700; }
+  .del    { text-decoration: line-through; color: #d1242f; }
+
+  .box-red   { border: 1px solid #ffcdd3; background: #fff5f5; border-radius: 6px; padding: 10px 14px; margin-top: 12px; }
+  .box-green { border: 1px solid #d4edda; background: #f0fff4; border-radius: 6px; padding: 10px 14px; margin-top: 8px; }
+  .hr { border: none; border-top: 1px solid #d0d7de; margin: 14px 0; }
+
+  /* Animated cursor */
+  .cursor { display: inline-block; width: 8px; height: 14px; background: #1f2328; vertical-align: middle; animation: blink .8s step-end infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* Fade-in for boxes */
+  .fade { opacity: 0; transition: opacity 0.6s ease; }
+  .fade.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="bar">
+    <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+    <span class="lbl">Groundwork — 01: Conflict Catch</span>
+  </div>
+  <div class="term" id="term">
+    <div class="split">
+      <div id="left"></div>
+      <div class="vdiv"></div>
+      <div id="right"></div>
+    </div>
+    <div id="conflict" class="box-red fade"></div>
+    <div id="footer" class="fade" style="margin-top:12px;border-top:1px solid #d0d7de;padding-top:10px;text-align:center;color:#57606a"></div>
+  </div>
+</div>
+
+<script>
+const left  = document.getElementById('left');
+const right = document.getElementById('right');
+const cfbox = document.getElementById('conflict');
+const footer = document.getElementById('footer');
+
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+async function typeInto(el, html, perChar = 22) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  const text = tmp.textContent || '';
+  let i = 0;
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  el.appendChild(cursor);
+  for (const ch of text) {
+    cursor.before(document.createTextNode(ch));
+    i++;
+    await delay(perChar + Math.random() * 15);
+    if (i % 4 === 0) await delay(5);
+  }
+  cursor.remove();
+}
+
+async function setHTML(el, html, fadeIn = false) {
+  el.innerHTML = html;
+  if (fadeIn) {
+    el.style.opacity = '0';
+    await delay(50);
+    el.style.transition = 'opacity 0.5s';
+    el.style.opacity = '1';
+  }
+}
+
+async function run() {
+  await delay(800);
+
+  // Left panel types in
+  const leftContent = `<pre><span class="muted">// prisma/schema.prisma</span>
+
+<span class="blue bold">model</span> <span class="bold">User</span> {
+  id        String   <span class="green">@id</span> <span class="muted">@default(uuid())</span>
+  email     String   <span class="green">@unique</span>
+  createdAt DateTime <span class="muted">@default(now())</span>
+}
+</pre>`;
+
+  await setHTML(left, leftContent);
+  await delay(600);
+
+  // Green box fades in on left
+  const gbox = document.createElement('div');
+  gbox.className = 'box-green fade';
+  gbox.innerHTML = '<span class="green bold">✓ Decision extracted (D004)</span><br/><span style="margin-top:4px;display:block">User IDs are UUID v4 strings</span><span class="muted" style="font-size:12px">confidence: 0.97 · Schema</span>';
+  left.appendChild(gbox);
+  await delay(100);
+  gbox.classList.add('show');
+  await delay(1400);
+
+  // Right panel: Dev 2 starts typing
+  await setHTML(right, '<pre><span class="muted">// billing/schema.ts  (Dev 2)</span>\n\n<span class="blue bold">interface</span> <span class="bold">BillingRecord</span> {\n  <span id="typing"></span></pre>');
+  const typingEl = document.getElementById('typing');
+
+  const badCode = 'user_id: INTEGER;';
+  for (const ch of badCode) {
+    typingEl.textContent += ch;
+    await delay(70 + Math.random() * 40);
+  }
+  await delay(600);
+
+  // Strike-through the bad code and show conflict box
+  typingEl.innerHTML = `<span class="del">${typingEl.textContent}</span>`;
+  await delay(400);
+
+  cfbox.innerHTML = `
+    <div style="margin-bottom:6px"><span class="red bold">⚠  Groundwork — Conflict Detected</span></div>
+    <span class="muted">Decision D004:</span> <span class="bold">User IDs are UUID v4 strings</span><br/>
+    <span class="muted">Decided by: Dev 1 · today at 10:32am</span><br/>
+    <span class="amber">Your code uses INTEGER — violates D004</span><br/><br/>
+    <span class="muted">Suggested fix: </span><code class="blue">String @id @default(uuid())</code>
+  `;
+  cfbox.classList.add('show');
+  await delay(1800);
+
+  // Correct the code
+  typingEl.innerHTML = '';
+  const fixCode = 'user_id: String; // @default(uuid())';
+  for (const ch of fixCode) {
+    typingEl.textContent += ch;
+    await delay(55 + Math.random() * 30);
+  }
+  typingEl.style.color = '#1a7f37';
+  await delay(600);
+
+  cfbox.style.background = '#f0fff4';
+  cfbox.style.borderColor = '#d4edda';
+  cfbox.innerHTML = '<span class="green bold">✓ Conflict resolved — D004 satisfied</span>';
+
+  footer.textContent = 'Conflict stopped before a single wrong line was committed.';
+  footer.classList.add('show');
+
+  await delay(4000);
+}
+
+run();
+</script>
+</body>
+</html>

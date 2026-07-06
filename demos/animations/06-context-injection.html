@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f0f2f5; font-family: 'JetBrains Mono','Fira Code','SF Mono',Consolas,monospace; width: 1060px; }
+  body { padding: 24px; }
+  .win { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.10); border: 1px solid #d0d7de; }
+  .bar { background: #f6f8fa; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #d0d7de; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dr { background: #ff5f57; } .dy { background: #ffbd2e; } .dg { background: #28c840; }
+  .lbl { margin: 0 auto; font-size: 12px; color: #57606a; font-weight: 500; }
+  .term { background: #fff; padding: 20px 24px; font-size: 13px; line-height: 1.65; color: #1f2328; min-height: 480px; }
+  .split { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0 20px; }
+  .vdiv { background: #d0d7de; }
+
+  .green  { color: #1a7f37; }
+  .red    { color: #d1242f; }
+  .amber  { color: #9a6700; }
+  .blue   { color: #0969da; }
+  .muted  { color: #57606a; }
+  .bold   { font-weight: 700; }
+
+  .box-blue  { border: 1px solid #b6d4fe; background: #f0f7ff; border-radius: 6px; padding: 12px 14px; }
+  .box-green { border: 1px solid #d4edda; background: #f0fff4; border-radius: 6px; padding: 10px 14px; }
+  .box-gray  { border: 1px solid #d0d7de; background: #f6f8fa; border-radius: 6px; padding: 10px 14px; }
+
+  .decision-chip { display: inline-block; padding: 2px 8px; background: #f0f7ff; border: 1px solid #b6d4fe; border-radius: 10px; font-size: 11px; color: #0969da; margin: 2px; }
+  .hr { border: none; border-top: 1px solid #d0d7de; margin: 14px 0; }
+
+  code { font-family: inherit; background: #f6f8fa; padding: 0 4px; border-radius: 3px; border: 1px solid #d0d7de; }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="bar">
+    <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+    <span class="lbl">Groundwork — 06: AI Context Injection</span>
+  </div>
+  <div class="term">
+    <div class="split">
+      <div id="left"></div>
+      <div class="vdiv"></div>
+      <div id="right"></div>
+    </div>
+    <hr class="hr"/>
+    <div id="footer" style="opacity:0;transition:opacity 0.5s"></div>
+  </div>
+</div>
+
+<script>
+const left  = document.getElementById('left');
+const right = document.getElementById('right');
+const footer = document.getElementById('footer');
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+function addTo(parent, html, fadeIn=true) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  if (fadeIn) { d.style.opacity='0'; d.style.transition='opacity 0.35s'; }
+  parent.appendChild(d);
+  return d;
+}
+async function show(el) {
+  await delay(40);
+  el.style.opacity='1';
+}
+
+async function typeInto(el, text, ms=55) {
+  for (const ch of text) {
+    el.textContent += ch;
+    await delay(ms + Math.random()*25);
+  }
+}
+
+async function run() {
+  await delay(700);
+
+  // Left: developer writes a prompt
+  addTo(left, '<span class="muted">// Developer\'s prompt to Claude Code</span>', false);
+  await delay(400);
+
+  const promptLine = addTo(left, '<br/><span class="blue bold">&gt;</span> <span id="devprompt"></span>');
+  await show(promptLine);
+  const dpEl = document.getElementById('devprompt');
+  await typeInto(dpEl, 'Build a user profile update endpoint', 50);
+  await delay(800);
+
+  // Left: just the simple prompt, nothing else (to contrast with what AI gets)
+  const noCtx = addTo(left, '<br/><div class="box-gray" style="font-size:12px"><span class="muted">What the developer typed — 6 words. No context about your codebase constraints.</span></div>');
+  await show(noCtx);
+  await delay(1000);
+
+  // Right: what the MCP layer actually sends
+  addTo(right, '<span class="muted">// What Claude Code receives (Groundwork MCP)</span>', false);
+  await delay(400);
+
+  const injLabel = addTo(right, '<br/><div class="box-blue" id="inj-box" style="font-size:12px"><span class="blue bold">⚡ Groundwork — injecting 6 relevant decisions</span><div id="inj-rows" style="margin-top:8px"></div></div>');
+  await show(injLabel);
+  await delay(400);
+
+  const injRows = document.getElementById('inj-rows');
+  const decisions = [
+    ['P0', 'red',   'D004', 'User IDs are UUID v4 strings',         'Prisma schema · 0.97'],
+    ['P0', 'red',   'D002', 'JWT Bearer auth on all protected routes','CLAUDE.md · 0.93'],
+    ['P0', 'red',   'D003', 'Prisma ORM for all DB — no raw SQL',    'package.json · 0.91'],
+    ['P1', 'amber', 'D009', 'Input validated with Zod before DB write','git history · 0.89'],
+    ['P1', 'amber', 'D015', 'Response shape: { data, error }',       'git history · 0.84'],
+    ['P2', 'muted', 'D021', 'Pino for structured logging',           'ci.yml · 0.78'],
+  ];
+
+  for (const [pri, priColor, id, desc, source] of decisions) {
+    const row = document.createElement('div');
+    row.style.cssText = 'margin-bottom:5px;opacity:0;transition:opacity 0.25s';
+    row.innerHTML = `<span class="${priColor} bold">[${pri}]</span> <span class="bold">${id}:</span> ${desc} <span class="muted" style="font-size:11px">(${source})</span>`;
+    injRows.appendChild(row);
+    await delay(40);
+    row.style.opacity = '1';
+    await delay(500);
+  }
+
+  await delay(800);
+
+  // Footer
+  const fb = document.createElement('div');
+  fb.className = 'box-green';
+  fb.style.cssText = 'font-size:12px';
+  fb.innerHTML = `<span class="green bold">↳ Claude Code's response</span> will automatically use UUIDs, JWT middleware, Prisma, Zod validation, and <code>{ data, error }</code> shape — without the developer ever specifying. <span class="green bold">Every decision your team made, honored automatically.</span>`;
+  footer.appendChild(fb);
+  footer.style.opacity = '1';
+
+  await delay(5000);
+}
+
+run();
+</script>
+</body>
+</html>

@@ -4,18 +4,22 @@
   "description": "Demo recording scripts for Groundwork — marketing material",
   "private": true,
   "scripts": {
-    "demo:conflict":  "ts-node scenarios/01-conflict-catch.ts",
-    "demo:onboard":   "ts-node scenarios/02-onboarding-scan.ts",
-    "demo:pr":        "playwright test scenarios/03-pr-block.spec.ts --headed",
+    "demo:conflict": "ts-node scenarios/01-conflict-catch.ts",
+    "demo:onboard": "ts-node scenarios/02-onboarding-scan.ts",
+    "demo:pr": "playwright test scenarios/03-pr-block.spec.ts --headed",
     "demo:propagate": "ts-node scenarios/04-propagation.ts",
-    "demo:all":       "bash scripts/record-all.sh",
-    "export":         "bash scripts/export-clips.sh"
+    "demo:all": "bash scripts/record-all.sh",
+    "export": "bash scripts/export-clips.sh",
+    "screenshots:light": "ts-node scripts/capture-light.ts",
+    "videos": "playwright test scenarios/record-videos.spec.ts",
+    "videos:to-gif": "bash scripts/webm-to-gif.sh"
   },
   "dependencies": {
+    "@playwright/test": "^1.44.0",
+    "ansi-to-html": "^0.7.2",
     "chalk": "^4.1.2",
     "cli-progress": "^3.12.0",
-    "ora": "^5.4.1",
-    "@playwright/test": "^1.44.0"
+    "ora": "^5.4.1"
   },
   "devDependencies": {
     "@types/cli-progress": "^3.11.5",
