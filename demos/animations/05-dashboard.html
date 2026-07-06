@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f0f2f5; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; width: 1060px; }
+  body { padding: 24px; }
+  .win { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.10); border: 1px solid #d0d7de; }
+  .bar { background: #f6f8fa; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #d0d7de; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dr { background: #ff5f57; } .dy { background: #ffbd2e; } .dg { background: #28c840; }
+  .lbl { margin: 0 auto; font-size: 12px; color: #57606a; font-weight: 500; }
+  .content { padding: 0; font-size: 13px; min-height: 500px; display: flex; }
+
+  /* Sidebar */
+  .sidebar { width: 200px; border-right: 1px solid #d0d7de; padding: 16px 12px; flex-shrink: 0; }
+  .sidebar-title { font-size: 11px; font-weight: 700; color: #57606a; letter-spacing: .5px; margin-bottom: 10px; }
+  .nav-item { padding: 6px 10px; font-size: 12px; color: #57606a; border-radius: 4px; margin-bottom: 2px; cursor: pointer; transition: background 0.2s; }
+  .nav-item.active { background: #f0f7ff; color: #0969da; border-left: 3px solid #0969da; }
+  .nav-divider { border-top: 1px solid #d0d7de; margin: 8px 0; }
+  .stat-row { font-size: 12px; margin-bottom: 4px; }
+
+  /* Main */
+  .main { flex: 1; padding: 20px 24px; }
+  .page-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { font-size: 12px; color: #57606a; margin-bottom: 14px; }
+
+  /* Table */
+  .decisions-table { border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; }
+  .table-head { display: grid; grid-template-columns: 48px 1fr 90px 60px 72px; padding: 8px 12px; background: #f6f8fa; border-bottom: 1px solid #d0d7de; font-size: 11px; font-weight: 700; color: #57606a; letter-spacing: .3px; }
+  .table-row { display: grid; grid-template-columns: 48px 1fr 90px 60px 72px; padding: 8px 12px; border-bottom: 1px solid #eaecef; font-size: 12px; align-items: center; opacity: 0; transition: opacity 0.25s; }
+  .table-row:last-child { border-bottom: none; }
+  .table-row.show { opacity: 1; }
+  .table-row.conflict-row { background: #fff5f5; }
+
+  .badge { padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-active   { background: #d4edda; color: #1a7f37; }
+  .badge-conflict { background: #ffcdd3; color: #d1242f; }
+  .badge-p0 { color: #d1242f; font-weight: 700; }
+  .badge-p1 { color: #9a6700; font-weight: 700; }
+  .badge-p2 { color: #57606a; font-weight: 700; }
+  .conf-high { color: #1a7f37; }
+  .conf-med  { color: #9a6700; }
+
+  /* Scan bar */
+  .scan-bar { background: #f0f7ff; border: 1px solid #b6d4fe; border-radius: 4px; padding: 8px 12px; font-size: 12px; color: #0969da; display: flex; gap: 8px; align-items: center; margin-bottom: 12px; opacity: 0; transition: opacity 0.4s; }
+  .scan-bar.show { opacity: 1; }
+  .spin { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="bar">
+    <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+    <span class="lbl">Groundwork Dashboard — localhost:3001</span>
+  </div>
+  <div class="content">
+    <div class="sidebar">
+      <div class="sidebar-title">GROUNDWORK</div>
+      <div class="nav-item active" id="nav-decisions">Decisions</div>
+      <div class="nav-item" id="nav-graph">Graph</div>
+      <div class="nav-item" id="nav-timeline">Timeline</div>
+      <div class="nav-item" id="nav-conflicts">Conflicts</div>
+      <div class="nav-divider"></div>
+      <div class="sidebar-title">STATS</div>
+      <div class="stat-row"><span style="color:#1a7f37;font-weight:700" id="stat-decisions">—</span> <span style="color:#57606a">decisions</span></div>
+      <div class="stat-row"><span style="color:#0969da;font-weight:700" id="stat-relations">—</span> <span style="color:#57606a">relationships</span></div>
+      <div class="stat-row"><span style="color:#d1242f;font-weight:700" id="stat-conflicts">—</span> <span style="color:#57606a">conflicts</span></div>
+    </div>
+    <div class="main">
+      <div class="scan-bar" id="scan-bar"><span class="spin">↻</span> Scanning acme-app… 38 seconds</div>
+      <div class="page-title">All Decisions</div>
+      <div class="page-sub" id="page-sub">acme-app · loading…</div>
+      <div class="decisions-table">
+        <div class="table-head">
+          <span>PRI</span><span>DECISION</span><span>SOURCE</span><span>CONF</span><span>STATUS</span>
+        </div>
+        <div id="rows"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const delay = ms => new Promise(r => setTimeout(r, ms));
+const rowsEl = document.getElementById('rows');
+
+const rows = [
+  ['P0','badge-p0', 'User IDs are UUID v4 strings',        'Schema',      '0.97','conf-high','active','badge-active',false],
+  ['P0','badge-p0', 'JWT Bearer tokens, 24h expiry',        'CLAUDE.md',   '0.93','conf-high','active','badge-active',false],
+  ['P0','badge-p0', 'Prisma ORM — no raw SQL',              'package.json','0.91','conf-high','active','badge-active',false],
+  ['P1','badge-p1', 'Tailwind CSS only, no CSS-in-JS',      'package.json','0.88','conf-high','active','badge-active',false],
+  ['P0','badge-p0', 'Stripe Payment Intents API',           'CLAUDE.md',   '0.71','conf-med', 'conflict','badge-conflict',true],
+  ['P1','badge-p1', 'Vitest with co-located test files',    'ci.yml',      '0.86','conf-high','active','badge-active',false],
+];
+
+async function run() {
+  await delay(500);
+
+  // Scan bar
+  const scanBar = document.getElementById('scan-bar');
+  scanBar.classList.add('show');
+  await delay(2200);
+  scanBar.innerHTML = '<span style="color:#1a7f37">✓</span> Scan complete — 39 decisions loaded';
+  await delay(600);
+  scanBar.style.opacity = '0';
+  await delay(400);
+  scanBar.style.display = 'none';
+
+  // Update stats
+  document.getElementById('stat-decisions').textContent = '39';
+  document.getElementById('stat-relations').textContent = '12';
+  document.getElementById('stat-conflicts').textContent = '2';
+  document.getElementById('page-sub').textContent = 'acme-app · last scan 38s ago · 39 decisions';
+
+  // Rows appear
+  for (const [pri,priCls,desc,src,conf,confCls,status,statusCls,isConflict] of rows) {
+    const d = document.createElement('div');
+    d.className = 'table-row' + (isConflict ? ' conflict-row' : '');
+    d.innerHTML = `
+      <span class="${priCls}">${pri}</span>
+      <span>${desc}</span>
+      <span style="color:#57606a">${src}</span>
+      <span class="${confCls}">${conf}</span>
+      <span class="badge ${statusCls}">${status}</span>
+    `;
+    rowsEl.appendChild(d);
+    await delay(50);
+    d.classList.add('show');
+    await delay(300);
+  }
+
+  // More row
+  const more = document.createElement('div');
+  more.className = 'table-row show';
+  more.innerHTML = '<span class="badge-p2">…</span><span style="color:#57606a">33 more decisions</span>';
+  rowsEl.appendChild(more);
+
+  await delay(2000);
+
+  // Click "Graph" nav
+  document.getElementById('nav-decisions').classList.remove('active');
+  document.getElementById('nav-graph').classList.add('active');
+  const main = document.querySelector('.main');
+
+  main.innerHTML = `
+    <div class="page-title">Decision Graph</div>
+    <div class="page-sub">12 relationships across 39 nodes</div>
+    <div style="border:1px solid #d0d7de;border-radius:6px;padding:20px;text-align:center;min-height:280px;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#fafafa">
+      <svg width="500" height="260" id="graph-svg"></svg>
+    </div>
+  `;
+
+  // Draw a simple graph
+  const svg = document.getElementById('graph-svg');
+  const nodes = [
+    { id: 'D001', label: 'UUID IDs', x: 250, y: 40, color: '#d1242f' },
+    { id: 'D002', label: 'JWT Auth', x: 100, y: 120, color: '#d1242f' },
+    { id: 'D003', label: 'Prisma ORM', x: 400, y: 120, color: '#d1242f' },
+    { id: 'D009', label: 'Zod Validation', x: 250, y: 200, color: '#9a6700' },
+    { id: 'D007', label: 'Stripe Intents', x: 100, y: 200, color: '#9a6700' },
+    { id: 'D015', label: '{ data, error }', x: 400, y: 200, color: '#0969da' },
+  ];
+  const edges = [
+    ['D001','D009','CONSTRAINS'],
+    ['D003','D009','DEPENDS_ON'],
+    ['D002','D015','CONSTRAINS'],
+    ['D001','D003','CONSTRAINS'],
+  ];
+
+  // Draw edges first
+  for (const [src,tgt,rel] of edges) {
+    const s = nodes.find(n=>n.id===src), t = nodes.find(n=>n.id===tgt);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', s.x); line.setAttribute('y1', s.y);
+    line.setAttribute('x2', t.x); line.setAttribute('y2', t.y);
+    line.setAttribute('stroke', '#d0d7de');
+    line.setAttribute('stroke-width', '1.5');
+    svg.appendChild(line);
+  }
+
+  // Draw nodes
+  for (const n of nodes) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.opacity = '0';
+    g.style.transition = 'opacity 0.4s';
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); circle.setAttribute('r', '24');
+    circle.setAttribute('fill', '#fff'); circle.setAttribute('stroke', n.color); circle.setAttribute('stroke-width', '2');
+    g.appendChild(circle);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x', n.x); text.setAttribute('y', n.y + 4);
+    text.setAttribute('text-anchor', 'middle'); text.setAttribute('font-size', '9');
+    text.setAttribute('fill', '#1f2328'); text.setAttribute('font-family', 'system-ui,sans-serif');
+    text.textContent = n.label;
+    g.appendChild(text);
+
+    svg.appendChild(g);
+    await delay(80);
+    g.style.opacity = '1';
+    await delay(350);
+  }
+
+  await delay(4000);
+}
+
+run();
+</script>
+</body>
+</html>

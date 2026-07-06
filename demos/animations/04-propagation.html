@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f0f2f5; font-family: 'JetBrains Mono','Fira Code','SF Mono',Consolas,monospace; width: 1060px; }
+  body { padding: 24px; }
+  .win { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.10); border: 1px solid #d0d7de; }
+  .bar { background: #f6f8fa; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #d0d7de; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dr { background: #ff5f57; } .dy { background: #ffbd2e; } .dg { background: #28c840; }
+  .lbl { margin: 0 auto; font-size: 12px; color: #57606a; font-weight: 500; }
+  .term { background: #fff; padding: 20px 24px; font-size: 13px; line-height: 1.65; color: #1f2328; min-height: 500px; }
+  .split { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0 20px; }
+  .vdiv { background: #d0d7de; }
+  pre { white-space: pre-wrap; }
+  .green  { color: #1a7f37; }
+  .red    { color: #d1242f; }
+  .amber  { color: #9a6700; }
+  .blue   { color: #0969da; }
+  .muted  { color: #57606a; }
+  .bold   { font-weight: 700; }
+  .box-green { border: 1px solid #d4edda; background: #f0fff4; border-radius: 6px; padding: 10px 14px; }
+  .box-blue  { border: 1px solid #b6d4fe; background: #f0f7ff; border-radius: 6px; padding: 10px 14px; }
+  .hr { border: none; border-top: 1px solid #d0d7de; margin: 14px 0; }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="bar">
+    <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+    <span class="lbl">Groundwork — 04: Decision Propagation</span>
+  </div>
+  <div class="term">
+    <div class="split">
+      <div id="left"></div>
+      <div class="vdiv"></div>
+      <div id="right"></div>
+    </div>
+    <div id="footer" style="opacity:0;margin-top:12px;border-top:1px solid #d0d7de;padding-top:10px;text-align:center;color:#57606a;transition:opacity 0.5s"></div>
+  </div>
+</div>
+
+<script>
+const left  = document.getElementById('left');
+const right = document.getElementById('right');
+const footer = document.getElementById('footer');
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+function addTo(parent, html, fade=true) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  if (fade) { d.style.opacity='0'; d.style.transition='opacity 0.3s'; }
+  parent.appendChild(d);
+  return d;
+}
+
+async function show(el) {
+  el.style.opacity='0';
+  await delay(40);
+  el.style.opacity='1';
+}
+
+async function typeInto(el, text, ms=60) {
+  for (const ch of text) {
+    el.textContent += ch;
+    await delay(ms + Math.random()*30);
+  }
+}
+
+async function run() {
+  await delay(700);
+
+  // Left header
+  const lh = addTo(left, '<span class="blue bold">▌ Dev 1 — Claude Code session</span>', false);
+  await delay(500);
+
+  // Left: session ending
+  const ls = addTo(left, '<br/><span class="muted">[Claude Code session ended — 10:47am]</span>');
+  await show(ls);
+  await delay(600);
+
+  // Left: spinner
+  const lspin = addTo(left, '<br/><span class="blue">↻</span>  Groundwork processing session…');
+  await show(lspin);
+  await delay(1600);
+
+  lspin.innerHTML = '<span class="green">✓</span>  Groundwork processing session complete';
+
+  await delay(500);
+
+  // Left: decisions extracted
+  const lgbox = document.createElement('div');
+  lgbox.className = 'box-green';
+  lgbox.style.cssText = 'margin:10px 0;opacity:0;transition:opacity 0.4s';
+  lgbox.innerHTML = `
+    <span class="green bold">✓ 3 decisions extracted</span><br/>
+    <div style="margin-top:6px;font-size:12px">
+      <div style="margin-bottom:3px"><span class="green">✓</span>  D012: WebSocket for real-time notifications</div>
+      <div style="margin-bottom:3px"><span class="green">✓</span>  D013: Redis for notification read state</div>
+      <div><span class="green">✓</span>  D014: BullMQ for failed notification retries</div>
+    </div>
+  `;
+  left.appendChild(lgbox);
+  await delay(50);
+  lgbox.style.opacity = '1';
+  await delay(800);
+
+  const lprop = addTo(left, '<span class="muted">Propagating to team graph…</span>');
+  await show(lprop);
+  await delay(1400);
+  lprop.innerHTML = '<span class="green">✓</span>  Propagated · 4 teammates notified';
+
+  await delay(600);
+
+  // Right: Dev 2 starts
+  const rh = addTo(right, '<span class="blue bold">▌ Dev 2 — Cursor (30 min later)</span>', false);
+  await delay(400);
+
+  const rp = addTo(right, '<br/><span class="muted">&gt;</span> <span id="rprompt"></span>');
+  await show(rp);
+  const rpromptEl = document.getElementById('rprompt');
+  await typeInto(rpromptEl, 'Build the notification delivery system. What approach?', 45);
+  await delay(1000);
+
+  // Right: AI response
+  const rbbox = document.createElement('div');
+  rbbox.className = 'box-blue';
+  rbbox.style.cssText = 'margin:10px 0;opacity:0;transition:opacity 0.5s;font-size:12px';
+  rbbox.innerHTML = `
+    <div style="margin-bottom:8px"><span class="blue bold">Based on your team's decisions:</span></div>
+    <div id="r1" style="margin-bottom:6px;opacity:0;transition:opacity 0.3s"><span class="green">•</span> Transport: <strong>WebSocket</strong><br/><span class="muted">  D012 — decided today, real-time delivery</span></div>
+    <div id="r2" style="margin-bottom:6px;opacity:0;transition:opacity 0.3s"><span class="green">•</span> Read state: <strong>Redis</strong><br/><span class="muted">  D013 — fast reads, no DB load</span></div>
+    <div id="r3" style="opacity:0;transition:opacity 0.3s"><span class="green">•</span> Failures: <strong>BullMQ retry queue</strong><br/><span class="muted">  D014 — exponential backoff</span></div>
+  `;
+  right.appendChild(rbbox);
+  await delay(50);
+  rbbox.style.opacity = '1';
+  await delay(400);
+
+  for (const id of ['r1','r2','r3']) {
+    const el = document.getElementById(id);
+    el.style.opacity = '1';
+    await delay(700);
+  }
+
+  await delay(600);
+
+  footer.textContent = 'Dev 1 decided. Dev 2\'s AI already knew. Zero communication required.';
+  footer.style.opacity = '1';
+
+  await delay(4000);
+}
+
+run();
+</script>
+</body>
+</html>

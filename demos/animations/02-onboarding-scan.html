@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f0f2f5; font-family: 'JetBrains Mono','Fira Code','SF Mono',Consolas,monospace; width: 820px; }
+  body { padding: 24px; }
+  .win { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.10); border: 1px solid #d0d7de; }
+  .bar { background: #f6f8fa; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #d0d7de; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dr { background: #ff5f57; } .dy { background: #ffbd2e; } .dg { background: #28c840; }
+  .lbl { margin: 0 auto; font-size: 12px; color: #57606a; font-weight: 500; }
+  .term { background: #fff; padding: 20px 24px; font-size: 13px; line-height: 1.65; color: #1f2328; min-height: 620px; }
+  pre { white-space: pre-wrap; }
+  .green  { color: #1a7f37; }
+  .red    { color: #d1242f; }
+  .amber  { color: #9a6700; }
+  .blue   { color: #0969da; }
+  .muted  { color: #57606a; }
+  .bold   { font-weight: 700; }
+
+  .progress-bar { height: 16px; background: #f0f7ff; border-radius: 4px; overflow: hidden; margin: 4px 0; border: 1px solid #b6d4fe; }
+  .progress-fill { height: 100%; background: #0969da; width: 0%; transition: width 0.1s linear; }
+
+  .box-green { border: 1px solid #d4edda; background: #f0fff4; border-radius: 6px; padding: 10px 14px; }
+  .box-amber { border: 1px solid #ffe08d; background: #fffbf0; border-radius: 6px; padding: 10px 14px; }
+  .box-blue  { border: 1px solid #b6d4fe; background: #f0f7ff; border-radius: 6px; padding: 10px 14px; }
+
+  .line { opacity: 0; }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: #1f2328; vertical-align: middle; animation: blink .8s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="bar">
+    <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+    <span class="lbl">Groundwork — 02: Onboarding Scan</span>
+  </div>
+  <div class="term" id="term"></div>
+</div>
+
+<script>
+const term = document.getElementById('term');
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+function addLine(html, color='') {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  if (color) d.style.color = color;
+  term.appendChild(d);
+  return d;
+}
+
+function addPre(html) {
+  const p = document.createElement('pre');
+  p.innerHTML = html;
+  term.appendChild(p);
+  return p;
+}
+
+async function animateProgress(fill, durationMs) {
+  const steps = 60;
+  const stepMs = durationMs / steps;
+  for (let i = 1; i <= steps; i++) {
+    fill.style.width = (i / steps * 100) + '%';
+    await delay(stepMs);
+  }
+}
+
+async function run() {
+  await delay(600);
+
+  // Prompt
+  addLine('<span class="blue bold">~/acme-app</span> <span class="bold">$</span> groundwork init');
+  await delay(400);
+
+  // Logo box
+  const logo = document.createElement('div');
+  logo.className = 'box-blue';
+  logo.style.margin = '10px 0 12px';
+  logo.innerHTML = '<span class="blue bold">Groundwork</span> <span class="muted">— Architectural decisions, enforced.</span>';
+  logo.style.opacity = '0';
+  term.appendChild(logo);
+  logo.style.transition = 'opacity 0.4s';
+  await delay(50);
+  logo.style.opacity = '1';
+  await delay(800);
+
+  // Scan lines appear
+  const checks = [
+    ['✓', 'green', 'Found ', 'bold', 'CLAUDE.md', '           reading team instructions'],
+    ['✓', 'green', 'Found ', 'bold', 'package.json', '        scanning 47 dependencies'],
+    ['✓', 'green', 'Found ', 'bold', 'prisma/schema.prisma', ' analyzing schema'],
+    ['↻', 'blue',  'Scanning repository AST', '', '', '  (50 files)…'],
+    ['✓', 'green', 'Reading git history', '', '', '       (last 90 days)'],
+    ['✓', 'green', 'Reading .github/workflows/ci.yml', '', '', ''],
+  ];
+
+  for (const [icon, iconColor, label, boldTag, boldText, rest] of checks) {
+    const line = document.createElement('div');
+    line.style.opacity = '0';
+    line.innerHTML = `<span class="${iconColor}">${icon}</span>  ${label}${boldTag ? `<span class="bold">${boldText}</span>` : boldText}<span class="muted">${rest}</span>`;
+    term.appendChild(line);
+    line.style.transition = 'opacity 0.25s';
+    await delay(40);
+    line.style.opacity = '1';
+    await delay(500 + Math.random() * 200);
+  }
+
+  await delay(600);
+
+  // Progress bar
+  const progWrap = document.createElement('div');
+  progWrap.innerHTML = `<div style="margin:10px 0 4px">  Classifying 51 findings…</div>`;
+  term.appendChild(progWrap);
+  const bar = document.createElement('div');
+  bar.className = 'progress-bar';
+  bar.style.margin = '0 0 12px';
+  const fill = document.createElement('div');
+  fill.className = 'progress-fill';
+  bar.appendChild(fill);
+  term.appendChild(bar);
+
+  await animateProgress(fill, 2800);
+  const pctLabel = document.createElement('div');
+  pctLabel.innerHTML = `  <span class="bold">100%</span> <span class="muted">— 51 findings classified</span>`;
+  term.appendChild(pctLabel);
+  await delay(500);
+
+  // Approved box
+  const approvedBox = document.createElement('div');
+  approvedBox.className = 'box-green';
+  approvedBox.style.margin = '10px 0 6px';
+  approvedBox.innerHTML = '<span class="green bold">Auto-approved — 31 decisions</span> <span class="muted">(confidence ≥ 0.85)</span>';
+  approvedBox.style.opacity = '0';
+  term.appendChild(approvedBox);
+  approvedBox.style.transition = 'opacity 0.4s';
+  await delay(50);
+  approvedBox.style.opacity = '1';
+  await delay(500);
+
+  const decisions = [
+    ['P0', 'red',   'Schema:',   'User IDs are UUID v4 strings'],
+    ['P0', 'red',   'Auth:',     'JWT tokens, Bearer scheme, 24h expiry'],
+    ['P0', 'red',   'ORM:',      'Prisma — no raw SQL permitted'],
+    ['P0', 'red',   'Payments:', 'Stripe Payment Intents API'],
+    ['P1', 'amber', 'Testing:',  'Vitest with co-located test files'],
+    ['P1', 'amber', 'State:',    'Zustand — no Redux or Context'],
+    ['P1', 'amber', 'Styling:',  'Tailwind CSS only, no CSS-in-JS'],
+  ];
+
+  for (const [pri, color, label, desc] of decisions) {
+    const d = document.createElement('div');
+    d.style.opacity = '0';
+    d.innerHTML = `  <span class="green">✓</span>  <span class="${color} bold">[${pri}]</span>  <span class="muted">${label}</span> ${desc}`;
+    term.appendChild(d);
+    d.style.transition = 'opacity 0.2s';
+    await delay(30);
+    d.style.opacity = '1';
+    await delay(280);
+  }
+
+  const more = document.createElement('div');
+  more.innerHTML = `  <span class="muted">    … 24 more</span>`;
+  term.appendChild(more);
+  await delay(600);
+
+  // Needs review
+  const reviewBox = document.createElement('div');
+  reviewBox.className = 'box-amber';
+  reviewBox.style.margin = '10px 0 6px';
+  reviewBox.innerHTML = '<span class="amber bold">Needs review — 8 decisions</span> <span class="muted">(confidence &lt; 0.85)</span>';
+  reviewBox.style.opacity = '0';
+  term.appendChild(reviewBox);
+  reviewBox.style.transition = 'opacity 0.4s';
+  await delay(50);
+  reviewBox.style.opacity = '1';
+  await delay(800);
+
+  // Final lines
+  const finals = [
+    `<span class="green">✓</span>  39 decisions loaded into your decision graph`,
+    `<span class="green">✓</span>  Your AI tools will now respect these constraints`,
+    `<span class="green">✓</span>  Run: <span class="blue bold">groundwork connect --all</span> to activate`,
+    `<span class="muted">   Setup complete in 38 seconds.</span>`,
+  ];
+  for (const f of finals) {
+    const d = document.createElement('div');
+    d.style.opacity = '0';
+    d.innerHTML = f;
+    term.appendChild(d);
+    d.style.transition = 'opacity 0.3s';
+    await delay(50);
+    d.style.opacity = '1';
+    await delay(500);
+  }
+
+  await delay(4000);
+}
+
+run();
+</script>
+</body>
+</html>

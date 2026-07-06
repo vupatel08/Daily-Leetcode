@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f0f2f5; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; width: 960px; }
+  body { padding: 24px; }
+  .win { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.10); border: 1px solid #d0d7de; }
+  .bar { background: #f6f8fa; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #d0d7de; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dr { background: #ff5f57; } .dy { background: #ffbd2e; } .dg { background: #28c840; }
+  .lbl { margin: 0 auto; font-size: 12px; color: #57606a; font-weight: 500; }
+  .content { padding: 20px 24px; font-size: 13px; line-height: 1.65; min-height: 480px; }
+
+  .pr-header { font-size: 18px; font-weight: 700; color: #1f2328; margin-bottom: 4px; }
+  .pr-sub { font-size: 12px; color: #57606a; margin-bottom: 16px; }
+  .pr-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-open { background: #dafbe1; color: #1a7f37; }
+  .badge-review { background: #fff8c5; color: #9a6700; }
+
+  .checks-section { border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
+  .checks-header { background: #f6f8fa; padding: 10px 14px; font-weight: 600; font-size: 13px; border-bottom: 1px solid #d0d7de; }
+  .check-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #eaecef; font-size: 13px; }
+  .check-row:last-child { border-bottom: none; }
+  .check-icon { font-size: 16px; flex-shrink: 0; }
+  .check-name { font-weight: 600; flex: 1; }
+  .check-desc { color: #57606a; font-size: 12px; }
+  .check-link { color: #0969da; font-size: 12px; }
+
+  .merge-section { border: 1px solid #d0d7de; border-radius: 6px; padding: 14px; margin-top: 12px; }
+  .merge-btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; width: 100%; }
+  .merge-btn-disabled { background: #d0d7de; color: #57606a; }
+  .merge-btn-enabled  { background: #1a7f37; color: #fff; }
+
+  .violations-box { background: #fff5f5; border: 1px solid #ffcdd3; border-radius: 4px; padding: 8px 12px; margin-top: 6px; font-size: 12px; }
+  .success-box    { background: #f0fff4; border: 1px solid #d4edda; border-radius: 4px; padding: 8px 12px; margin-top: 6px; font-size: 12px; }
+
+  .fade { opacity: 0; transition: opacity 0.5s; }
+  .show { opacity: 1; }
+  .green  { color: #1a7f37; }
+  .red    { color: #d1242f; }
+  .amber  { color: #9a6700; }
+  .blue   { color: #0969da; }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="bar">
+    <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+    <span class="lbl">github.com/acme/acme-app — Pull Request #142</span>
+  </div>
+  <div class="content">
+    <div class="pr-header">Add billing module with user payment tracking</div>
+    <div class="pr-sub">feature/billing → main · opened by dev2 · +318 −12</div>
+    <div class="pr-meta">
+      <span class="badge badge-open">Open</span>
+      <span class="badge badge-review">Review required</span>
+    </div>
+
+    <div class="checks-section">
+      <div class="checks-header">Checks</div>
+      <div class="check-row" id="ci-check">
+        <span class="check-icon">⏳</span>
+        <div>
+          <div class="check-name">CI / build</div>
+          <div class="check-desc">Running tests…</div>
+        </div>
+      </div>
+      <div class="check-row" id="gw-check">
+        <span class="check-icon">⏳</span>
+        <div>
+          <div class="check-name">groundwork / check</div>
+          <div class="check-desc">Checking architectural decisions…</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="violations" class="violations-box fade">
+      <span class="red bold">✗</span> D004: user_id field should be String UUID, not INTEGER<br/>
+      <span class="red bold">✗</span> D007: Stripe Payment Intents required — Checkout API is deprecated
+    </div>
+
+    <div id="all-clear" class="success-box fade" style="display:none">
+      <span class="green bold">✓</span> D004: UUID v4 string ID confirmed in billing model<br/>
+      <span class="green bold">✓</span> D007: Payment Intents API confirmed in BillingService
+    </div>
+
+    <div class="merge-section">
+      <div style="margin-bottom:8px;font-size:13px;font-weight:600" id="merge-label">This branch has not been reviewed yet</div>
+      <button class="merge-btn merge-btn-disabled" id="merge-btn">Merge blocked — fix violations first</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+async function run() {
+  await delay(1200);
+
+  // CI passes
+  const ciRow = document.getElementById('ci-check');
+  ciRow.querySelector('.check-icon').textContent = '✅';
+  ciRow.querySelector('.check-desc').textContent = 'All 47 tests passed';
+  await delay(800);
+
+  // Groundwork FAILS
+  const gwRow = document.getElementById('gw-check');
+  gwRow.querySelector('.check-icon').textContent = '❌';
+  gwRow.querySelector('.check-name').style.color = '#d1242f';
+  gwRow.querySelector('.check-desc').innerHTML = '<span style="color:#d1242f">2 P0 violations — merge blocked</span>';
+  await delay(400);
+
+  // Show violations
+  const viols = document.getElementById('violations');
+  viols.classList.add('show');
+  await delay(3500);
+
+  // Dev 2 fixes the code…
+  const fixing = document.createElement('div');
+  fixing.style.cssText = 'text-align:center;color:#57606a;font-style:italic;font-size:12px;margin:12px 0;padding:8px;background:#f6f8fa;border-radius:4px;border:1px solid #d0d7de';
+  fixing.textContent = '⏳  Dev 2 fixing violations…';
+  document.querySelector('.content').insertBefore(fixing, document.querySelector('.merge-section'));
+  await delay(2200);
+  fixing.textContent = '✓  Violations fixed — pushing commit…';
+  fixing.style.color = '#1a7f37';
+  await delay(1400);
+  fixing.remove();
+
+  // Re-run: Groundwork PASSES
+  gwRow.querySelector('.check-icon').textContent = '⏳';
+  gwRow.querySelector('.check-name').style.color = '';
+  gwRow.querySelector('.check-desc').textContent = 'Re-checking architectural decisions…';
+  await delay(1600);
+
+  gwRow.querySelector('.check-icon').textContent = '✅';
+  gwRow.querySelector('.check-name').style.color = '#1a7f37';
+  gwRow.querySelector('.check-desc').innerHTML = '<span style="color:#1a7f37">All decisions satisfied</span>';
+
+  // Hide violations, show all-clear
+  viols.classList.remove('show');
+  await delay(300);
+  const allClear = document.getElementById('all-clear');
+  allClear.style.display = 'block';
+  allClear.style.opacity = '0';
+  allClear.style.transition = 'opacity 0.5s';
+  await delay(50);
+  allClear.style.opacity = '1';
+
+  // Enable merge
+  const mergeBtn = document.getElementById('merge-btn');
+  const mergeLabel = document.getElementById('merge-label');
+  mergeLabel.textContent = '✓ All checks passed — ready to merge';
+  mergeLabel.style.color = '#1a7f37';
+  mergeBtn.className = 'merge-btn merge-btn-enabled';
+  mergeBtn.textContent = '✓ Merge pull request';
+
+  await delay(4000);
+}
+
+run();
+</script>
+</body>
+</html>

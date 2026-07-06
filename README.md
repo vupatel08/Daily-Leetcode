@@ -4,16 +4,18 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+---
+
 ## The Problem
 
 AI coding tools like Claude Code, Cursor, and GitHub Copilot have made individual developers incredibly productive. But when teams use them, chaos emerges:
 
-- **No shared memory**: Each developer's AI has a completely isolated view of the project
-- **Architectural drift**: AI tools make locally sensible but globally inconsistent decisions
-- **Lost decisions**: Choices made in AI sessions disappear when the session ends
-- **Review bottlenecks**: Code reviews become the new constraint as teams check for consistency
+- **No shared memory** — each developer's AI has a completely isolated view of the project
+- **Architectural drift** — AI tools make locally sensible but globally inconsistent decisions
+- **Lost decisions** — choices made in AI sessions disappear when the session ends
+- **Review bottlenecks** — code reviews become the constraint as teams check for consistency
 
-Research shows that at team scales of 15+ developers, AI tool productivity gains compress to just 31% because coordination overhead dominates.
+At team scales of 15+ developers, AI productivity gains compress to just 31% because coordination overhead dominates.
 
 ## The Solution
 
@@ -25,194 +27,256 @@ Groundwork sits underneath every AI coding tool your team uses. It:
 
 ---
 
-## How It Works
+## Demos
 
-### Conflict catch — before a single wrong line is committed
+> All 6 demos below are animated recordings of the actual tool.
 
-Dev 1 commits to UUID IDs. Dev 2 starts typing `INTEGER` in a different session. Groundwork fires mid-keystroke:
+<!-- ─── SCENARIO 1 ──────────────────────────────────────────────────────── -->
+<details>
+<summary><strong>🚨 Scenario 1 — Conflict Catch:</strong> stops the wrong line before it's committed</summary>
+<br/>
 
-![Groundwork conflict catch — conflict box fires before wrong line is committed](docs/images/demo-01-conflict.png)
+Dev 1 commits to UUID string IDs. Dev 2 starts typing `INTEGER` in a different session 20 minutes later. Groundwork fires a conflict box mid-keystroke and suggests the correct type — before a single wrong line is committed.
 
-### Onboarding scan — 39 decisions loaded in 38 seconds
+![Groundwork conflict catch demo](docs/images/01-conflict-catch.gif)
 
-Run `groundwork init` in any project. It reads CLAUDE.md, package.json, Prisma schemas, git history, and CI config — and loads your team's decisions automatically from day one:
+**Screenshot (light mode):**
 
-![Groundwork onboarding scan — decisions loading with progress bar and P0/P1 priority badges](docs/images/demo-02-onboard.png)
+![Conflict catch screenshot](docs/images/demo-01-conflict.png)
 
-### PR enforcement — P0 violations block merge
+</details>
 
-The GitHub Action checks every PR against the decision graph. P0 violations block the merge button:
+<!-- ─── SCENARIO 2 ──────────────────────────────────────────────────────── -->
+<details>
+<summary><strong>📦 Scenario 2 — Onboarding Scan:</strong> 39 decisions loaded in 38 seconds</summary>
+<br/>
 
-![Groundwork PR check failed — violation table and blocked merge button](docs/images/03-pr-blocked.png)
+Run `groundwork init` in any existing project. It reads CLAUDE.md, package.json, Prisma schemas, git history, and CI config — and loads your team's decisions automatically from day one. No cold start.
 
-Fix the violation. Check re-runs. Merge button activates:
+![Groundwork onboarding scan demo](docs/images/02-onboarding-scan.gif)
 
-![Groundwork PR check passed — all checks green, merge button active](docs/images/03-pr-passing.png)
+**Screenshot (light mode):**
 
-### Propagation — Dev 2's AI already knows
+![Onboarding scan screenshot](docs/images/demo-02-onboard.png)
 
-Dev 1 ends a session. Groundwork extracts 3 new decisions and propagates them. Dev 2 starts a new session immediately and asks a completely unrelated question — their AI responds already citing WebSocket, Redis, and BullMQ by decision ID:
+</details>
 
-![Groundwork propagation — Dev 2's AI cites Dev 1's decisions without being told](docs/images/demo-04-propagation.png)
+<!-- ─── SCENARIO 3 ──────────────────────────────────────────────────────── -->
+<details>
+<summary><strong>🔒 Scenario 3 — PR Enforcement:</strong> P0 violations block the merge button</summary>
+<br/>
+
+The GitHub Action checks every PR against the decision graph. P0 (critical) violations block the merge button entirely. Fix the violation, push, and the check re-runs — merge button activates.
+
+![Groundwork PR enforcement demo](docs/images/03-pr-check.gif)
+
+**Screenshots (before and after fix):**
+
+![PR check blocked](docs/images/demo-03-pr-check.png)
+
+</details>
+
+<!-- ─── SCENARIO 4 ──────────────────────────────────────────────────────── -->
+<details>
+<summary><strong>🔄 Scenario 4 — Propagation:</strong> Dev 2's AI already knows what Dev 1 decided</summary>
+<br/>
+
+Dev 1 ends a Claude Code session. Groundwork extracts 3 new decisions (WebSocket, Redis, BullMQ) and propagates them to the team graph. Dev 2 starts a new session 30 minutes later and asks a completely unrelated question — their AI responds already citing the correct approaches by decision ID.
+
+![Groundwork propagation demo](docs/images/04-propagation.gif)
+
+**Screenshot (light mode):**
+
+![Propagation screenshot](docs/images/demo-04-propagation.png)
 
 *Dev 1 decided. Dev 2's AI already knew. Zero communication required.*
 
+</details>
+
+<!-- ─── SCENARIO 5 ──────────────────────────────────────────────────────── -->
+<details>
+<summary><strong>📊 Scenario 5 — Decision Dashboard:</strong> live graph, timeline, and conflict view</summary>
+<br/>
+
+The web dashboard shows all decisions, their relationships, a chronological timeline, and active conflicts. Navigate between Decisions, Graph, Timeline, and Conflicts views. Runs on `localhost:3001` and shares a URL you can link teammates to with `?tab=graph`.
+
+![Groundwork dashboard demo](docs/images/05-dashboard.gif)
+
+**Screenshot (light mode):**
+
+![Dashboard screenshot](docs/images/demo-05-dashboard.png)
+
+</details>
+
+<!-- ─── SCENARIO 6 ──────────────────────────────────────────────────────── -->
+<details>
+<summary><strong>⚡ Scenario 6 — Context Injection:</strong> what your AI actually sees</summary>
+<br/>
+
+When you type a prompt into Claude Code or Cursor, Groundwork's MCP layer intercepts it and injects the 4–8 most relevant decisions from your team's graph. A 6-word prompt like "build a user profile endpoint" becomes a fully context-aware request — without the developer having to know or specify any of the constraints.
+
+![Groundwork context injection demo](docs/images/06-context-injection.gif)
+
+**Screenshot (light mode):**
+
+![Context injection screenshot](docs/images/demo-06-context-injection.png)
+
+</details>
+
 ---
-
-## Core Features
-
-### 🎯 Automatic Decision Extraction
-- Scans existing codebase on install (20-40 decisions from day one)
-- Extracts decisions from live AI coding sessions
-- Processes CLAUDE.md, package.json, database schemas, and more
-
-### 🔄 Real-Time Propagation
-- Decisions reach other developers' AI tools in under 60 seconds
-- Smart, relevance-ranked injection (only relevant decisions get injected)
-- Works with Claude Code, Cursor, Windsurf, and all MCP-compatible tools
-
-### 🚫 Enforcement Layer
-- GitHub Action checks every PR against the decision graph
-- P0 (critical) violations block merge
-- P1 (important) violations warn but don't block
-- Detailed explanations of what violated which decision
-
-### 📊 Decision Graph
-- Living network of decisions and their relationships
-- Priority levels (P0/P1/P2) for smart enforcement
-- Conflict detection before code gets written
-- CONSTRAINS / DEPENDS_ON / SUPERSEDES / CONFLICTS_WITH edge types
 
 ## Quick Start
 
-### Installation
+> **Current status**: Full local workflow works today. Clone the repo, build, and run.
+> npm package publishing is in progress (see [Hosting & Deployment](#hosting--deployment) below).
 
 ```bash
-# Install the Groundwork CLI
-npm install -g @groundwork/cli
+# Clone and install
+git clone https://github.com/vupatel08/Daily-Leetcode
+cd Daily-Leetcode
+npm ci
 
-# Initialize in your project
+# Build everything
+npm run build
+
+# Run the API + dashboard
+cd packages/api && npm start
+# Dashboard: http://localhost:3001
+
+# Initialize Groundwork in your project
 cd your-project
-groundwork init
-
-# Connect to your AI tools (one-time setup)
-groundwork connect
+node /path/to/groundwork/packages/cli/dist/cli.js init
 ```
 
-That's it. Groundwork now runs automatically in the background.
+See [QUICKSTART.md](./QUICKSTART.md) for the full step-by-step guide.
 
-### First Run
+---
 
-On first install, Groundwork scans your existing project and extracts decisions from:
-- CLAUDE.md / AGENTS.md files
-- package.json dependencies  
-- Database schemas
-- Architecture documentation
-- Recent commit history
-
-Your decision graph is populated immediately—no cold start.
-
-## How It Fits With Spec-Driven Development
-
-Groundwork complements SDD tools like GitHub Spec Kit, OpenSpec, AWS Kiro, and BMAD:
-
-| **SDD Tools** | **Groundwork** |
-|---------------|----------------|
-| Help you write specs *before* building | Captures decisions *during* building |
-| Define what to build | Remembers what was decided |
-| Static documents | Living, enforced graph |
-| Require manual maintenance | Automatic extraction and updates |
-
-**Together**: SDD defines the plan. Groundwork captures what happened during execution and makes sure every AI on the team knows about it.
-
-## Architecture
+## How It Works
 
 ```
 LAYER 5: Product Requirements (Jira, Linear)
            ↓
-LAYER 4: Specifications (OpenSpec, GitHub Spec Kit) ← SDD tools operate here
+LAYER 4: Specifications (OpenSpec, GitHub Spec Kit)   ← SDD tools
            ↓
-LAYER 3: Decision Graph (Groundwork) ← THIS IS THE GAP WE FILL
+LAYER 3: Decision Graph (Groundwork)                  ← THIS GAP
            ↓
 LAYER 2: AI Coding Tools (Claude Code, Cursor, etc.)
            ↓
 LAYER 1: Generated Code
 ```
 
-## The MVP
+---
 
-The minimum viable product focuses on three extractors:
+## Core Features
 
-1. **CLAUDE.md / AGENTS.md reader** - Highest signal existing decisions
-2. **package.json scanner** - Every dependency is a decision
-3. **Database schema analyzer** - ID formats, naming conventions, patterns
+| Feature | Description |
+|---------|-------------|
+| **Auto-extraction** | Reads CLAUDE.md, package.json, Prisma schemas, git history, CI config |
+| **Real-time propagation** | Decisions reach other AI tools in < 60 seconds |
+| **Conflict detection** | Fires before wrong code is written, not after |
+| **PR enforcement** | GitHub Action blocks merges on P0 violations |
+| **Decision Graph** | Living network with CONSTRAINS / DEPENDS_ON / SUPERSEDES / CONFLICTS_WITH edges |
+| **Dashboard** | Web UI for decisions, graph, timeline, conflicts |
+| **MCP server** | Works with Claude Code, Cursor, and all MCP-compatible tools |
 
-Two AI tool integrations:
-- Claude Code
-- Cursor
+---
 
-One enforcement mechanism:
-- GitHub Action PR blocker
+## Hosting & Deployment
 
-This covers 80% of team decisions with a focused, shippable scope.
+Groundwork has three deployment modes:
+
+### Mode 1 — Local (works today, no hosting needed)
+
+Every developer runs the MCP server on their own machine. Decisions are stored in a local JSON file. No database, no cloud. Perfect for solo devs and trying it out.
+
+```bash
+# MCP server runs locally, decisions stored at ~/.groundwork/decisions.json
+groundwork init && groundwork connect
+```
+
+**What works**: all extraction, injection, conflict detection, CLI, dashboard.
+**What doesn't**: sharing decisions across a team (that requires Mode 2).
+
+---
+
+### Mode 2 — Self-hosted team server
+
+Deploy the `packages/api` Express server somewhere with a Postgres database. All team members point their MCP servers at the same API endpoint.
+
+**Easiest options (15-minute deploy):**
+
+| Platform | Cost | Notes |
+|----------|------|-------|
+| [Railway.app](https://railway.app) | Free tier / ~$5/mo | Click-deploy from GitHub, add Postgres plugin |
+| [Render.com](https://render.com) | Free tier | Free Postgres for 90 days, then $7/mo |
+| [Fly.io](https://fly.io) | ~$3/mo | `fly launch` from the `packages/api` directory |
+| Docker Compose | Your infra cost | See `database/schema.sql` for Postgres setup |
+
+**Deploy to Railway** (fastest path):
+```bash
+# 1. Push this repo to GitHub (already done)
+# 2. Go to railway.app → New Project → Deploy from GitHub
+# 3. Select the repo → set root to packages/api
+# 4. Add a Postgres database plugin
+# 5. Set env vars: DATABASE_URL (from Railway), PORT=3001
+# 6. Done — team API is live
+```
+
+Then each developer sets:
+```bash
+export GROUNDWORK_API_URL=https://your-app.railway.app
+groundwork connect
+```
+
+---
+
+### Mode 3 — Cloud SaaS (V2 roadmap)
+
+A hosted version of Groundwork where you sign up, connect your repo, and zero infrastructure is needed. This is the V2 direction — not built yet.
+
+---
 
 ## Roadmap
 
-### V1 - MVP (Implemented ✅)
-- [x] MCP server exposing 4 tools for Claude Code + Cursor
-- [x] Decision extraction: CLAUDE.md, package.json, Prisma schema, git history, CI config
-- [x] Extraction pipeline with cross-source dedupe
+### V1 — MVP (Implemented ✅)
+
+- [x] MCP server (Claude Code + Cursor integration)
+- [x] Decision extraction: CLAUDE.md, package.json, Prisma, git history, CI config
+- [x] Extraction pipeline with cross-source deduplication
 - [x] Decision store: local JSON (zero-dep) or Postgres + pgvector
-- [x] Priority-aware, relevance-ranked injection
-- [x] Conflict detection (rule-based, high-precision)
-- [x] Relationship graph (CONSTRAINS / DEPENDS_ON / SUPERSEDES / CONFLICTS_WITH)
+- [x] Priority-aware, relevance-ranked context injection
+- [x] Conflict detection (rule-based, fires before code is written)
+- [x] Decision Graph with typed relationships (CONSTRAINS / DEPENDS_ON / SUPERSEDES / CONFLICTS_WITH)
+- [x] RelationshipInferrer (automatic edge derivation)
 - [x] Session extraction (heuristic + optional LLM)
 - [x] GitHub Action PR enforcement (blocks P0 violations)
-- [x] Cloud API + React dashboard (decisions + graph + timeline + conflicts)
-- [x] Slack notifications + config system
+- [x] REST API + React dashboard (decisions, graph, timeline, conflicts, deep-linking)
+- [x] Slack notifications
+- [x] CLI (`init`, `scan`, `status`, `connect`)
 - [x] 37 passing tests
 
-See [QUICKSTART.md](./QUICKSTART.md) to run it.
+### V2 — Months 4-6
 
-### V2 - Months 4-6
+- [ ] npm package publishing (`npm install -g @groundwork/cli`)
+- [ ] Hosted cloud API (no self-hosting required)
 - [ ] Windsurf, Codex, Copilot support
 - [ ] Graph DB upgrade
 - [ ] Coverage heatmap
 - [ ] Linear/Jira integration
 - [ ] Meeting transcript extraction
 
-### V3 - Months 7-12
+### V3 — Months 7-12
+
 - [ ] Fine-tuned extraction model
 - [ ] On-premises deployment
-- [ ] SOC 2 Type II certification
+- [ ] SOC 2 Type II
 - [ ] SAML/SSO
 - [ ] OpenSpec deep integration
 
-### V4 - Year 2
-- [ ] Cross-repo governance
-- [ ] Decision impact analysis
-- [ ] AI-assisted conflict resolution
-- [ ] Custom model fine-tuning
+---
 
-## Pricing
-
-- **Free**: 1 developer, 1 project, 50 decisions, no enforcement
-- **Team ($299/mo)**: Up to 15 developers, unlimited projects, full enforcement
-- **Growth ($799/mo)**: Up to 50 developers, integrations, coverage heatmap
-- **Enterprise (from $50K/yr)**: Unlimited, on-premises, SSO, dedicated support
-
-## Privacy & Security
-
-**Core principle: Raw code never leaves your machine.**
-
-- MCP server runs locally on developer's computer
-- Extraction pipeline runs locally
-- Only structured decisions (JSON) reach Groundwork cloud
-- Source code, secrets, and environment variables never transmitted
-- Open source MCP server (Apache 2.0) - fully auditable
-- On-premises deployment available for Enterprise
-
-## Repository Layout
+## Architecture
 
 ```
 packages/
@@ -222,45 +286,46 @@ packages/
   cli/            # groundwork CLI (init, scan, status, connect)
   api/            # Express API + React dashboard
   github-action/  # PR enforcement GitHub Action
-  landing/        # Marketing landing page
 database/         # Postgres schema (pgvector)
-demos/            # Demo recording scripts (4 scenarios)
-example/          # Sample project used for demos/tests
-docs/             # Product, architecture, business, SDD integration
+demos/            # Animated demo recordings (6 scenarios)
+docs/             # Product, architecture, SDD integration docs
 ```
-
-## Documentation
-
-- [Quickstart](./QUICKSTART.md) - Run Groundwork in minutes
-- [Development Setup](./DEVELOPMENT.md) - Local dev environment
-- [Full Product Document](./docs/PRODUCT.md) - Complete vision and architecture
-- [Technical Architecture](./docs/ARCHITECTURE.md) - System design details
-- [Decision Graph Design](./docs/DECISION_GRAPH.md) - Core data structure
-- [Integration Guide](./docs/INTEGRATIONS.md) - How to connect AI tools
-- [MVP Specification](./docs/MVP.md) - What gets built first
-- [SDD Integration](./docs/SDD_INTEGRATION.md) - How Groundwork fits with SDD tools
-
-## Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
-
-## License
-
-MIT License - see [LICENSE](./LICENSE) for details.
-
-## Market Context
-
-- 85% of developers now use AI coding tools regularly
-- 87% of Fortune 500 companies use AI coding platforms
-- 50%+ of Fortune 1000 have active SDD pipelines (April 2026)
-- 110,000+ AI-introduced issues found in production repos
-- Teams hit "three-month wall" where AI-generated codebases become unmaintainable
-
-**The SDD movement solved the "what to build" problem. Groundwork solves the "what was decided during building" problem.**
 
 ---
 
-**Groundwork** - The architectural decisions your AI won't forget.
+## Documentation
 
-Website: [groundwork.dev](https://groundwork.dev) | Email: hello@groundwork.dev
+- [Quickstart](./QUICKSTART.md) — run Groundwork in 5 minutes
+- [Technical Architecture](./docs/ARCHITECTURE.md) — system design
+- [Decision Graph Design](./docs/DECISION_GRAPH.md) — core data structure
+- [Integration Guide](./docs/INTEGRATIONS.md) — connecting AI tools
+- [Full Product Document](./docs/PRODUCT.md) — complete vision
+- [SDD Integration](./docs/SDD_INTEGRATION.md) — how Groundwork fits with SDD tools
 
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
+
+---
+
+## Privacy & Security
+
+**Core principle: raw code never leaves your machine.**
+
+- MCP server runs locally on each developer's computer
+- Extraction pipeline runs locally
+- Only structured decisions (JSON metadata) reach the team store
+- Source code, secrets, and environment variables are never transmitted
+- Open source — fully auditable
+
+---
+
+*The SDD movement solved "what to build." Groundwork solves "what was decided during building."*
+
+**Groundwork** — The architectural decisions your AI won't forget.
