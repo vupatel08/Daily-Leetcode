@@ -5,15 +5,44 @@ const API = '';
 function useApi(path, deps = []) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const refetch = useCallback(() => {
     setLoading(true);
+    setError(null);
     fetch(API + path)
-      .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((d) => {
+        if (d && typeof d === 'object' && d.error) throw new Error(d.error);
+        setData(d);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setData(null);
+        setError(err.message || 'Request failed');
+        setLoading(false);
+      });
   }, [path]);
   useEffect(refetch, deps);
-  return { data, loading, refetch };
+  return { data, loading, error, refetch };
+}
+
+function ApiError({ message }) {
+  return (
+    <div className="empty">
+      <p>{message || 'Could not load data from the API.'}</p>
+      <p className="muted" style={{ marginTop: '0.75rem' }}>
+        The decision dashboard is meant to run locally:
+        <code style={{ display: 'block', marginTop: '0.5rem' }}>
+          PROJECT_PATH=. node packages/api/dist/index.js
+        </code>
+        For the marketing site, visit{' '}
+        <a href="https://groudwork-website.vercel.app">groudwork-website.vercel.app</a>.
+      </p>
+    </div>
+  );
 }
 
 function Stat({ num, label, cls }) {
@@ -47,13 +76,14 @@ function DecisionCard({ d }) {
 }
 
 function DecisionsTab() {
-  const { data: decisions, loading } = useApi('/api/decisions');
+  const { data: decisions, loading, error } = useApi('/api/decisions');
   const [priority, setPriority] = useState('');
   const [domain, setDomain] = useState('');
   const [q, setQ] = useState('');
 
   if (loading) return <div className="loading">Loading decisions…</div>;
-  if (!decisions || decisions.length === 0)
+  if (error) return <ApiError message={error} />;
+  if (!Array.isArray(decisions) || decisions.length === 0)
     return <div className="empty">No decisions yet. Run <code>groundwork scan</code>.</div>;
 
   const domains = Array.from(new Set(decisions.map((d) => d.domain))).sort();
@@ -83,9 +113,10 @@ function DecisionsTab() {
 }
 
 function ConflictsTab() {
-  const { data: conflicts, loading } = useApi('/api/conflicts');
+  const { data: conflicts, loading, error } = useApi('/api/conflicts');
   if (loading) return <div className="loading">Loading conflicts…</div>;
-  if (!conflicts || conflicts.length === 0)
+  if (error) return <ApiError message={error} />;
+  if (!Array.isArray(conflicts) || conflicts.length === 0)
     return <div className="empty">No conflicts detected. The graph is coherent. ✅</div>;
   return (
     <div>
@@ -108,11 +139,12 @@ const EDGE_COLORS = {
 const PRIORITY_COLORS = { P0: '#ff5c5c', P1: '#ffb84d', P2: '#6b7688' };
 
 function GraphTab() {
-  const { data: graph, loading } = useApi('/api/graph');
+  const { data: graph, loading, error } = useApi('/api/graph');
   const [hover, setHover] = useState(null);
 
   if (loading) return <div className="loading">Building graph…</div>;
-  if (!graph || graph.nodes.length === 0)
+  if (error) return <ApiError message={error} />;
+  if (!graph || !Array.isArray(graph.nodes) || graph.nodes.length === 0)
     return <div className="empty">No graph yet. Run <code>groundwork scan</code>.</div>;
 
   // Circular layout
@@ -181,9 +213,10 @@ function GraphTab() {
 }
 
 function TimelineTab() {
-  const { data: timeline, loading } = useApi('/api/timeline');
+  const { data: timeline, loading, error } = useApi('/api/timeline');
   if (loading) return <div className="loading">Loading timeline…</div>;
-  if (!timeline || timeline.length === 0)
+  if (error) return <ApiError message={error} />;
+  if (!Array.isArray(timeline) || timeline.length === 0)
     return <div className="empty">No decisions yet.</div>;
   return (
     <div className="timeline">
@@ -234,7 +267,7 @@ function App() {
   };
 
   const byPriority = (stats && stats.byPriority) || {};
-  const conflictCount = (conflicts && conflicts.length) || 0;
+  const conflictCount = Array.isArray(conflicts) ? conflicts.length : 0;
 
   return (
     <div className="app">
