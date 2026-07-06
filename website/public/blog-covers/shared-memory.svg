@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#f5f5f5"/>
+  <rect x="80" y="100" width="280" height="180" fill="#fff" stroke="#000" stroke-width="2"/>
+  <text x="100" y="140" font-family="monospace" font-size="11" fill="#525252">SHARED MEMORY</text>
+  <text x="100" y="180" font-family="monospace" font-size="12" fill="#000">clipboard � recall</text>
+  <text x="100" y="210" font-family="monospace" font-size="12" fill="#000">user-scoped facts</text>
+  <rect x="440" y="100" width="280" height="180" fill="#000"/>
+  <text x="460" y="140" font-family="monospace" font-size="11" fill="#888">DECISION GRAPH</text>
+  <text x="460" y="180" font-family="monospace" font-size="12" fill="#fff">constraints � inject</text>
+  <text x="460" y="210" font-family="monospace" font-size="12" fill="#fff">team-scoped � conflict</text>
+  <text x="80" y="360" font-family="Georgia, serif" font-size="26" fill="#000">Not the same thing</text>
+</svg>

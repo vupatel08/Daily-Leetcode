@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#fff"/>
+  <rect x="120" y="100" width="560" height="200" fill="none" stroke="#000" stroke-width="2"/>
+  <line x1="120" y1="140" x2="680" y2="140" stroke="#e5e5e5" stroke-width="1"/>
+  <text x="140" y="130" font-family="monospace" font-size="10" fill="#525252">UNSENT</text>
+  <text x="140" y="175" font-family="Georgia, serif" font-size="18" fill="#000">JWT � Bearer � 24h expiry</text>
+  <text x="140" y="210" font-family="monospace" font-size="12" fill="#525252">Authorization header</text>
+  <rect x="500" y="160" width="140" height="36" fill="#000"/>
+  <text x="520" y="183" font-family="monospace" font-size="10" fill="#fff">INJECTED </text>
+  <text x="120" y="380" font-family="Georgia, serif" font-size="24" fill="#000">The message we never sent</text>
+</svg>

@@ -7,11 +7,17 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build:shared && npm run build --workspace=@groundwork/mcp-server && npm run build --workspace=@groundwork/cli && npm run build --workspace=@groundwork/api && npm run build --workspace=@groundwork/github-action",
+    "build:shared": "npm run build --workspace=@groundwork/shared",
     "test": "npm run test --workspaces",
     "lint": "eslint packages/*/src --ext .ts,.tsx",
-    "dev": "npm run dev --workspace=@groundwork/mcp-server",
-    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules"
+    "dev": "npm run build:shared && npm run dev --workspace=@groundwork/mcp-server",
+    "website:dev": "npm run dev --prefix website",
+    "website:build": "npm run build --prefix website",
+    "website:screenshots": "npm run screenshots:light --prefix demos",
+    "publish:cli": "npm run build && npm publish --workspace=@groundwork/cli --access public",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules",
+    "postinstall": "npm run build:shared"
   },
   "keywords": [
     "ai",
@@ -28,7 +34,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vupatel08/Daily-Leetcode.git"
+    "url": "https://github.com/vupatel08/Groudwork.git"
   },
   "engines": {
     "node": ">=18.0.0",

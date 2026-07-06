@@ -3,96 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Groundwork — The architectural decisions your AI won't forget</title>
-  <meta name="description" content="Groundwork is the decision layer that makes AI development work at team scale. Capture, propagate, and enforce architectural decisions automatically." />
+  <title>Groundwork — moved to website/</title>
+  <meta http-equiv="refresh" content="2;url=https://github.com/vupatel08/Groudwork/tree/main/website" />
   <link rel="stylesheet" href="landing.css" />
+  <style>
+    body { display: grid; place-items: center; min-height: 100vh; padding: 2rem; text-align: center; }
+    code { display: block; margin: 1.5rem auto; max-width: 28rem; padding: 1rem; border: 2px solid #000; background: #f5f5f5; }
+  </style>
 </head>
 <body>
-  <nav>
-    <div class="brand">
-      <div class="mark">G</div>
-      <span>Groundwork</span>
-    </div>
-    <div class="nav-links">
-      <a href="#how">How it works</a>
-      <a href="#features">Features</a>
-      <a href="#pricing">Pricing</a>
-      <a href="https://github.com/vupatel08/Daily-Leetcode" class="btn-ghost">GitHub</a>
-    </div>
-  </nav>
-
-  <header class="hero">
-    <div class="tagline-badge">Layer 3 · The decision layer</div>
-    <h1>The architectural decisions<br /><span class="grad">your AI won't forget</span></h1>
-    <p class="sub">
-      AI coding tools are fast but forgetful. Groundwork sits underneath Claude Code,
-      Cursor, and every AI tool your team uses — capturing decisions automatically,
-      propagating them to every teammate's AI in real time, and blocking PRs that violate them.
+  <div>
+    <div class="mark" style="margin:0 auto 1rem;width:48px;height:48px;display:grid;place-items:center;background:#000;color:#fff;font-weight:700;">G</div>
+    <h1 style="font-family:Georgia,serif;font-size:2rem;">Marketing site moved</h1>
+    <p style="margin-top:1rem;color:#525252;max-width:32rem;">
+      The full Groundwork site now lives in <strong>website/</strong> (Next.js, same design system as our product docs).
     </p>
-    <div class="cta">
-      <code>npx @groundwork/cli init</code>
-      <a href="#how" class="btn-primary">See how it works</a>
-    </div>
-    <div class="hero-stats">
-      <div><b>&lt;60s</b><span>decision propagation</span></div>
-      <div><b>&lt;80ms</b><span>injection latency</span></div>
-      <div><b>0</b><span>P0 violations merged</span></div>
-    </div>
-  </header>
-
-  <section class="problem">
-    <h2>Five developers. Five AIs. Zero shared memory.</h2>
-    <div class="drift">
-      <div class="drift-step"><b>Mon</b> Dev 1's AI decides: user IDs are UUIDs.</div>
-      <div class="arrow">→</div>
-      <div class="drift-step"><b>Tue</b> Dev 2's AI picks integer IDs. It never knew.</div>
-      <div class="arrow">→</div>
-      <div class="drift-step"><b>Wed</b> Dev 3's AI uses emails "to avoid the conflict."</div>
-      <div class="arrow">→</div>
-      <div class="drift-step bad"><b>Thu</b> Tests break. Two days of rework.</div>
-    </div>
-    <p class="muted">
-      Researchers call it <b>architectural drift</b> — 110,000+ AI-introduced issues
-      counted in production repos. The tools are fast. The coordination is broken.
+    <code>cd website && npm install && npm run dev</code>
+    <p style="margin-top:1rem;font-size:0.875rem;color:#737373;">
+      Opens at <a href="http://localhost:3001">http://localhost:3001</a> ·
+      <a href="https://github.com/vupatel08/Groudwork/tree/main/website">View on GitHub</a>
     </p>
-  </section>
-
-  <section id="how">
-    <h2>How Groundwork works</h2>
-    <div class="steps">
-      <div class="step"><span class="n">1</span><h3>Capture</h3><p>Scans your repo on install (CLAUDE.md, package.json, Prisma schema) and extracts decisions from live AI sessions.</p></div>
-      <div class="step"><span class="n">2</span><h3>Propagate</h3><p>Injects the right decisions into every teammate's AI context before they write a line — via the Model Context Protocol.</p></div>
-      <div class="step"><span class="n">3</span><h3>Detect</h3><p>Flags conflicts in real time. A UUID decision and an incoming integer-ID plan get caught before code is written.</p></div>
-      <div class="step"><span class="n">4</span><h3>Enforce</h3><p>A GitHub Action checks every PR against the decision graph and blocks merges that violate a P0 decision.</p></div>
-    </div>
-  </section>
-
-  <section id="features" class="features">
-    <h2>Built for teams shipping with AI</h2>
-    <div class="grid">
-      <div class="card"><h3>Automatic extraction</h3><p>20–40 decisions on day one. No manual ADR writing.</p></div>
-      <div class="card"><h3>The decision graph</h3><p>Decisions and their relationships — not a flat list of rules.</p></div>
-      <div class="card"><h3>MCP-native</h3><p>Works with Claude Code, Cursor, and any MCP tool.</p></div>
-      <div class="card"><h3>PR enforcement</h3><p>P0 blocks. P1 warns. Every violation explained.</p></div>
-      <div class="card"><h3>Slack alerts</h3><p>Conflicts land in your team channel instantly.</p></div>
-      <div class="card"><h3>Local-first & private</h3><p>Raw code never leaves your machine. Local JSON or Postgres.</p></div>
-    </div>
-  </section>
-
-  <section id="pricing" class="pricing">
-    <h2>Pricing</h2>
-    <div class="tiers">
-      <div class="tier"><h3>Free</h3><div class="price">$0</div><ul><li>1 developer</li><li>50 decisions</li><li>Dashboard (read-only)</li></ul></div>
-      <div class="tier featured"><h3>Team</h3><div class="price">$299<span>/mo</span></div><ul><li>Up to 15 developers</li><li>Unlimited decisions</li><li>PR enforcement + Slack</li></ul></div>
-      <div class="tier"><h3>Growth</h3><div class="price">$799<span>/mo</span></div><ul><li>Up to 50 developers</li><li>Linear/Jira, heatmap</li><li>Priority support</li></ul></div>
-      <div class="tier"><h3>Enterprise</h3><div class="price">$50k<span>/yr</span></div><ul><li>On-prem, SSO, SOC 2</li><li>Unlimited developers</li><li>Dedicated CSM</li></ul></div>
-    </div>
-  </section>
-
-  <footer class="site-footer">
-    <div class="brand"><div class="mark">G</div><span>Groundwork</span></div>
-    <p>The governance layer that makes AI-generated code auditable and coherent at team scale.</p>
-    <p class="muted">groundwork.dev · SDD is the discipline. Groundwork is the infrastructure.</p>
-  </footer>
+  </div>
 </body>
 </html>

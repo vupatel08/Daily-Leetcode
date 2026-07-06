@@ -2,6 +2,8 @@
 
 **The decision layer that makes AI development actually work at team scale.**
 
+📖 **Website & docs:** `cd website && npm install && npm run dev` → http://localhost:3001
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---

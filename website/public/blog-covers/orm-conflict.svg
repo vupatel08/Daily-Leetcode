@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#fff"/>
+  <rect x="100" y="120" width="240" height="120" fill="none" stroke="#000" stroke-width="2"/>
+  <text x="120" y="160" font-family="monospace" font-size="14" fill="#000">Prisma ORM</text>
+  <text x="120" y="190" font-family="monospace" font-size="10" fill="#525252">ACTIVE � D005</text>
+  <rect x="460" y="120" width="240" height="120" fill="none" stroke="#000" stroke-width="4"/>
+  <text x="480" y="160" font-family="monospace" font-size="14" fill="#000">Drizzle</text>
+  <text x="480" y="190" font-family="monospace" font-size="10" fill="#000">CONFLICT</text>
+  <line x1="340" y1="180" x2="460" y2="180" stroke="#000" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="100" y="320" font-family="Georgia, serif" font-size="24" fill="#000">Never asked about ORMs</text>
+</svg>

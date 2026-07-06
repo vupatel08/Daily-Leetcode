@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#fff"/>
+  <text x="100" y="160" font-family="monospace" font-size="16" fill="#000">{ &quot;userId&quot;: &quot;abc&quot; }</text>
+  <text x="100" y="220" font-family="monospace" font-size="16" fill="#525252">{ &quot;user_id&quot;: &quot;abc&quot; }</text>
+  <line x1="100" y1="250" x2="700" y2="250" stroke="#000" stroke-width="3"/>
+  <text x="100" y="300" font-family="monospace" font-size="12" fill="#000">camelCase vs snake_case</text>
+  <text x="100" y="380" font-family="Georgia, serif" font-size="26" fill="#000">Six hours debugging</text>
+</svg>

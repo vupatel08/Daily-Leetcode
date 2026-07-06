@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #000000;
+  --muted: #f5f5f5;
+  --muted-foreground: #525252;
+  --accent: #000000;
+  --accent-foreground: #ffffff;
+  --border: #000000;
+  --border-light: #e5e5e5;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --ring: #000000;
+  --status-active: #059669;
+  --status-active-bg: #ecfdf5;
+  --status-disputed: #d97706;
+  --status-disputed-bg: #fffbeb;
+  --status-conflicted: #dc2626;
+  --status-conflicted-bg: #fef2f2;
+  --status-superseded: #737373;
+  --status-superseded-bg: #f5f5f5;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  ::selection {
+    background: #000000;
+    color: #ffffff;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-display {
+    font-family: var(--font-playfair), Georgia, serif;
+  }
+
+  .font-body {
+    font-family: var(--font-source-serif), Georgia, serif;
+  }
+
+  .font-mono-label {
+    font-family: var(--font-jetbrains), ui-monospace, monospace;
+  }
+}
+
+/* Paper noise — global subtle texture */
+.texture-noise {
+  position: relative;
+}
+
+.texture-noise::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Horizontal line texture */
+.texture-lines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    #000 1px,
+    #000 2px
+  );
+  background-size: 100% 4px;
+  opacity: 0.015;
+}
+
+/* Editorial grid */
+.texture-grid {
+  background-image:
+    linear-gradient(#00000008 1px, transparent 1px),
+    linear-gradient(90deg, #00000008 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Inverted section vertical lines */
+.texture-lines-inverted {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 1px,
+    #fff 1px,
+    #fff 2px
+  );
+  background-size: 4px 100%;
+  opacity: 0.04;
+}
+
+.section-rule {
+  @apply h-1 w-full bg-[var(--foreground)];
+}
+
+.section-rule-thick {
+  @apply h-2 w-full bg-[var(--foreground)];
+}
+
+.section-rule-ultra {
+  @apply h-[6px] w-full bg-[var(--foreground)];
+}
+
+.markdown-content .markdown-ul > li {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.markdown-content .markdown-ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 6px;
+  height: 6px;
+  background: var(--foreground);
+}
+
+.markdown-content .markdown-ul ul {
+  margin-top: 0.5rem;
+}
+
+.markdown-content .markdown-ol > li {
+  padding-left: 0.25rem;
+}
+
+.markdown-content .markdown-ol > li::marker {
+  font-weight: 600;
+}
+
+/* Editorial drop cap — blog & long-form */
+.markdown-editorial > .markdown-content > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.1rem 1rem 0 0;
+  border: 2px solid var(--foreground);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 3.5rem;
+  font-weight: 600;
+  line-height: 1;
+}

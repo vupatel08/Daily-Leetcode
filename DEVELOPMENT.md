@@ -35,6 +35,8 @@ npm install --workspaces
 ### 3. Build All Packages
 
 ```bash
+# Shared types must build first (also runs automatically on npm install)
+npm run build:shared
 npm run build
 ```
 

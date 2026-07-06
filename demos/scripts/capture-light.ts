@@ -5,9 +5,9 @@
  * colors. Covers 6 scenarios (01–06) and saves PNGs to demos/output/light/.
  */
 
-const { spawnSync } = require('child_process') as typeof import('child_process');
 const fs = require('fs') as typeof import('fs');
 const path = require('path') as typeof import('path');
+const { chromium } = require('@playwright/test') as typeof import('@playwright/test');
 
 const OUT = path.join(__dirname, '../output/light');
 fs.mkdirSync(OUT, { recursive: true });
@@ -18,57 +18,51 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const THEME_CSS = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { background: #f0f2f5; font-family: 'JetBrains Mono','Fira Code','Cascadia Code','SF Mono',Consolas,monospace; }
+  html, body { background: #ffffff; font-family: 'JetBrains Mono','Fira Code','Cascadia Code','SF Mono',Consolas,monospace; }
   body { padding: 24px; }
 
-  /* Window chrome */
   .win {
     background: #ffffff;
-    border-radius: 10px;
+    border-radius: 0;
     overflow: hidden;
-    box-shadow: 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.08);
-    border: 1px solid #d0d7de;
+    border: 2px solid #000000;
   }
   .bar {
-    background: #f6f8fa;
+    background: #000000;
     padding: 10px 16px;
     display: flex;
     align-items: center;
     gap: 8px;
-    border-bottom: 1px solid #d0d7de;
+    border-bottom: 2px solid #000000;
   }
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dr  { background: #ff5f57; }
-  .dy  { background: #ffbd2e; }
-  .dg  { background: #28c840; }
-  .lbl { margin: 0 auto; font-size: 12px; color: #57606a; letter-spacing: .3px; font-weight: 500; }
-  .term { background: #ffffff; padding: 20px 24px; font-size: 13px; line-height: 1.65; color: #1f2328; }
+  .dot { width: 10px; height: 10px; border-radius: 0; border: 1px solid #fff; }
+  .dr  { background: #ffffff; }
+  .dy  { background: #ffffff; }
+  .dg  { background: #ffffff; }
+  .lbl { margin: 0 auto; font-size: 11px; color: #ffffff; letter-spacing: .15em; font-weight: 500; text-transform: uppercase; }
+  .term { background: #ffffff; padding: 20px 24px; font-size: 13px; line-height: 1.65; color: #000000; }
 
-  /* Semantic colours — light-mode friendly */
-  .green  { color: #1a7f37; }   /* success */
-  .red    { color: #d1242f; }   /* error / P0 */
-  .amber  { color: #9a6700; }   /* warning / P1 */
-  .blue   { color: #0969da; }   /* info / links */
-  .purple { color: #8250df; }   /* highlight */
-  .muted  { color: #57606a; }
+  .green  { color: #059669; }
+  .red    { color: #dc2626; }
+  .amber  { color: #d97706; }
+  .blue   { color: #000000; font-weight: 600; }
+  .purple { color: #000000; }
+  .muted  { color: #525252; }
   .bold   { font-weight: 700; }
   .dim    { opacity: .55; }
   .u      { text-decoration: underline; }
-  .del    { text-decoration: line-through; color: #d1242f; }
+  .del    { text-decoration: line-through; color: #dc2626; }
 
-  /* Boxes */
-  .box-red    { border: 1px solid #ffcdd3; background: #fff5f5; border-radius: 6px; padding: 10px 14px; }
-  .box-green  { border: 1px solid #d4edda; background: #f0fff4; border-radius: 6px; padding: 10px 14px; }
-  .box-amber  { border: 1px solid #ffe08d; background: #fffbf0; border-radius: 6px; padding: 10px 14px; }
-  .box-blue   { border: 1px solid #b6d4fe; background: #f0f7ff; border-radius: 6px; padding: 10px 14px; }
-  .box-gray   { border: 1px solid #d0d7de; background: #f6f8fa; border-radius: 6px; padding: 10px 14px; }
+  .box-red    { border: 2px solid #dc2626; background: #fef2f2; border-radius: 0; padding: 10px 14px; }
+  .box-green  { border: 2px solid #059669; background: #ecfdf5; border-radius: 0; padding: 10px 14px; }
+  .box-amber  { border: 2px solid #d97706; background: #fffbeb; border-radius: 0; padding: 10px 14px; }
+  .box-blue   { border: 2px solid #000000; background: #f5f5f5; border-radius: 0; padding: 10px 14px; }
+  .box-gray   { border: 2px solid #000000; background: #f5f5f5; border-radius: 0; padding: 10px 14px; }
 
-  /* Divider */
-  hr.sec { border: none; border-top: 1px solid #d0d7de; margin: 14px 0; }
+  hr.sec { border: none; border-top: 2px solid #000000; margin: 14px 0; }
 
-  /* Split layout */
-  .split { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0 20px; }
-  .vdiv  { background: #d0d7de; }
+  .split { display: grid; grid-template-columns: 1fr 2px 1fr; gap: 0 20px; }
+  .vdiv  { background: #000000; }
 `;
 
 function page(title: string, body: string, width = 900): string {
@@ -83,34 +77,38 @@ function page(title: string, body: string, width = 900): string {
 </div></body></html>`;
 }
 
-function shot(html: string, slug: string, w: number, h: number): void {
-  const htmlFile = path.join(OUT, `${slug}.html`);
-  const pngFile  = path.join(OUT, `${slug}.png`);
-  const userDir  = `/tmp/chrome-${slug}-${Date.now()}`;
-  fs.writeFileSync(htmlFile, html);
-
-  const args = [
-    '--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars',
-    `--window-size=${w + 48},${h + 48}`,
-    '--virtual-time-budget=2000',
-    `--screenshot=${pngFile}`,
-    `--user-data-dir=${userDir}`,
-    `file://${htmlFile}`,
-  ];
-
-  let res = spawnSync('google-chrome-stable', args, { stdio: 'pipe' });
-  if (res.status !== 0 || !fs.existsSync(pngFile)) {
-    res = spawnSync('google-chrome', args, { stdio: 'pipe' });
+async function shot(html: string, slug: string, w: number, h: number): Promise<void> {
+  const pngFile = path.join(OUT, `${slug}.png`);
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: w + 48, height: h + 48 } });
+    await page.setContent(html, { waitUntil: 'load' });
+    await page.locator('.win').screenshot({ path: pngFile });
+    console.log(`  ✓ ${slug}.png`);
+  } catch {
+    console.log(`  ✗ ${slug}.png`);
+  } finally {
+    await browser.close();
   }
-  const exists = fs.existsSync(pngFile);
-  console.log(`  ${exists ? '✓' : '✗'} ${slug}.png`);
 }
+
+const DOCS_IMAGES = path.join(__dirname, '../../docs/images');
+const SCREENSHOT_SLUGS = [
+  'demo-01-conflict',
+  'demo-02-onboard',
+  'demo-03-pr-check',
+  'demo-04-propagation',
+  'demo-05-dashboard',
+  'demo-06-context-injection',
+];
+
+async function main(): Promise<void> {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // S1 — Conflict Catch
 // ─────────────────────────────────────────────────────────────────────────────
 
-shot(page('Groundwork — 01: Conflict Catch', `
+await shot(page('Groundwork — 01: Conflict Catch', `
 <div class="split">
   <pre>
 <span class="muted">// prisma/schema.prisma</span>
@@ -153,7 +151,7 @@ shot(page('Groundwork — 01: Conflict Catch', `
 // S2 — Onboarding Scan
 // ─────────────────────────────────────────────────────────────────────────────
 
-shot(page('Groundwork — 02: Onboarding Scan', `<pre>
+await shot(page('Groundwork — 02: Onboarding Scan', `<pre>
 <span class="blue bold">~/acme-app</span> <span class="bold">$</span> groundwork init
 
 <div class="box-blue" style="margin:8px 0 12px">
@@ -199,7 +197,7 @@ shot(page('Groundwork — 02: Onboarding Scan', `<pre>
 // S3 — PR Block
 // ─────────────────────────────────────────────────────────────────────────────
 
-shot(page('Groundwork — 03: PR Enforcement', `
+await shot(page('Groundwork — 03: PR Enforcement', `
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
   <!-- BLOCKED -->
   <div>
@@ -248,7 +246,7 @@ shot(page('Groundwork — 03: PR Enforcement', `
 // S4 — Propagation
 // ─────────────────────────────────────────────────────────────────────────────
 
-shot(page('Groundwork — 04: Decision Propagation', `
+await shot(page('Groundwork — 04: Decision Propagation', `
 <div class="split">
   <pre>
 <span class="blue bold">▌ Dev 1 — Claude Code session</span>
@@ -293,7 +291,7 @@ shot(page('Groundwork — 04: Decision Propagation', `
 // S5 — Dashboard Walkthrough
 // ─────────────────────────────────────────────────────────────────────────────
 
-shot(page('Groundwork — 05: Decision Dashboard', `
+await shot(page('Groundwork — 05: Decision Dashboard', `
 <div style="display:grid;grid-template-columns:200px 1fr;gap:16px">
   <!-- Sidebar -->
   <div style="border-right:1px solid #d0d7de;padding-right:16px">
@@ -348,7 +346,7 @@ shot(page('Groundwork — 05: Decision Dashboard', `
 // S6 — Context Injection (what the AI actually sees)
 // ─────────────────────────────────────────────────────────────────────────────
 
-shot(page('Groundwork — 06: AI Context Injection', `
+await shot(page('Groundwork — 06: AI Context Injection', `
 <div class="split">
   <pre>
 <span class="muted">// Developer's prompt to Claude Code</span>
@@ -384,3 +382,19 @@ shot(page('Groundwork — 06: AI Context Injection', `
 `, 1060), 'demo-06-context-injection', 1060, 500);
 
 console.log('\n  ✓ All light-theme screenshots done → demos/output/light/\n');
+
+fs.mkdirSync(DOCS_IMAGES, { recursive: true });
+for (const slug of SCREENSHOT_SLUGS) {
+  const src = path.join(OUT, `${slug}.png`);
+  const dest = path.join(DOCS_IMAGES, `${slug}.png`);
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dest);
+    console.log(`  ✓ copied → docs/images/${slug}.png`);
+  }
+}
+}
+
+main().catch((err: unknown) => {
+  console.error(err);
+  process.exit(1);
+});

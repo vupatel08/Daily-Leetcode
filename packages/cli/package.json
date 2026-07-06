@@ -8,8 +8,16 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "predev": "npm run build --workspace=@groundwork/shared && npm run build --workspace=@groundwork/mcp-server",
+    "prepack": "npm run build"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "groundwork",
     "cli",

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#fff"/>
+  <text x="80" y="100" font-family="monospace" font-size="10" fill="#525252">CLAUDE � CURSOR � CODEX</text>
+  <rect x="80" y="120" width="100" height="32" fill="none" stroke="#000" stroke-width="1.5"/>
+  <text x="95" y="141" font-family="monospace" font-size="9" fill="#000">Claude</text>
+  <rect x="200" y="120" width="100" height="32" fill="none" stroke="#000" stroke-width="1.5"/>
+  <text x="220" y="141" font-family="monospace" font-size="9" fill="#000">Cursor</text>
+  <rect x="320" y="120" width="100" height="32" fill="none" stroke="#000" stroke-width="1.5"/>
+  <text x="345" y="141" font-family="monospace" font-size="9" fill="#000">Codex</text>
+  <line x1="130" y1="152" x2="400" y2="220" stroke="#000" stroke-width="1"/>
+  <line x1="250" y1="152" x2="400" y2="220" stroke="#000" stroke-width="1"/>
+  <line x1="370" y1="152" x2="400" y2="220" stroke="#000" stroke-width="1"/>
+  <rect x="300" y="220" width="200" height="48" fill="#000"/>
+  <text x="340" y="250" font-family="monospace" font-size="11" fill="#fff">SAME GRAPH</text>
+  <text x="80" y="340" font-family="Georgia, serif" font-size="26" fill="#000">Survive agent churn</text>
+</svg>

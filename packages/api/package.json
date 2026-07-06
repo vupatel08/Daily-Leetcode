@@ -4,8 +4,9 @@
   "description": "Groundwork cloud API + dashboard server",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build --workspace=@groundwork/shared && npm run build --workspace=@groundwork/mcp-server && tsc",
     "dev": "tsc --watch",
+    "predev": "npm run build --workspace=@groundwork/shared && npm run build --workspace=@groundwork/mcp-server",
     "start": "node dist/index.js"
   },
   "author": "Groundwork",
